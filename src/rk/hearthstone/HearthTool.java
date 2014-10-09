@@ -37,9 +37,8 @@ public class HearthTool {
 			if(s.substring(0,6).equals("[Zone]")) { //if [Zone] log
 				Map<String,String> event = HearthstoneGame.parseEvent(s); //attempt to parse event
 				if(event.containsKey(("type"))) { //if event:type was parsed
-					if(theGame.getState()>0) { //if game is in recording decks state
-						theGame.handleEvent(event); //pass event to record event 
-					}
+					theFrame.writeConsole("'"+event.get("name").trim()+"':"+"'"+event.get("from").trim()+"'->"+"'"+event.get("to").trim()+"'");
+					theGame.handleEvent(event); //pass event to game to handle
 				}
 			}
 		}
@@ -64,6 +63,7 @@ public class HearthTool {
 		theFrame.writeConsole(s);
 	}
 
+	
 	public void watchFile(File file) {
 		theFrame.watchingFile(watchingFile = true); //update UI
 		parseLog(file); //do intial parse of file
@@ -123,7 +123,17 @@ public class HearthTool {
 	
 	public void notifyGameState(int i) {
 		if(i == HearthstoneGame.WAITING_HERO_FRIENDLY) {
-			theFrame.recordWaiting(); //update the frame to show game state
+			theFrame.recordWaiting(); //update UI
+			theFrame.writeConsole("Game State: WAITING_HERO_FRIENDLY");
+		}else if(i==HearthstoneGame.EVENT_HERO_FRIENDLY_PLAY) {
+			theFrame.gameStarted(); //update UI 
+			theFrame.writeConsole("Game State: EVENT_HERO_FRIENDLY_PLAY");
+		}else if(i==HearthstoneGame.DEALING_FRIENDLY_DECK) {
+			theFrame.gameStarted(); //update UI 
+			theFrame.writeConsole("Game State: DEALING_FRIENDLY_DECK");
+		}else if(i==HearthstoneGame.DEALING_OPPOSING_DECK) {
+			theFrame.gameStarted(); //update UI 
+			theFrame.writeConsole("Game State: DEALING_OPPOSING_DECK");
 		}
 	}
 }

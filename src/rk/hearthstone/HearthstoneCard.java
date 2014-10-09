@@ -4,16 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HearthstoneCard {
-	protected Map<String,String> cardProperties;
+	protected Map<String,String> cardAttributes;
 	
 	
 	public HearthstoneCard() {
-		cardProperties = new HashMap<String,String>();
-		
-		cardProperties.put("name","unknown");
+		cardAttributes = new HashMap<String,String>();
 	}
 	
-	public HearthstoneCard(String n) {
-		cardProperties.put("name",n);
+	public Map<String,String> getAttributes() {
+		return cardAttributes;
 	}
 }

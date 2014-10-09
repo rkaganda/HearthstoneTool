@@ -193,6 +193,9 @@ public class HearthFrame extends JFrame implements ActionListener {
 			public void run() {
 				recordButton.setText("Waiting Game");
 				recordButton.setBackground(Color.YELLOW);
+				watchButton.setText("Stop Watching"); 
+				watchButton.setBackground(Color.RED);
+				watchButton.setEnabled(true);
 			}
 		});
 	}
@@ -202,6 +205,18 @@ public class HearthFrame extends JFrame implements ActionListener {
 			public void run() {
 				recordButton.setText("Record Games");
 				recordButton.setBackground(Color.LIGHT_GRAY);
+			}
+		});
+	}
+
+
+	public void gameStarted() {
+		SwingUtilities.invokeLater(new Runnable() { //watching stopped
+			public void run() {
+				recordButton.setText("Recording Game");
+				recordButton.setBackground(Color.RED);
+				watchButton.setBackground(new Color(80,0,0));
+				watchButton.setEnabled(false); //record disabled
 			}
 		});
 	}
