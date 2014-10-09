@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -74,7 +75,8 @@ public class HearthFrame extends JFrame implements ActionListener {
 		watchButton.addActionListener(this);
 		watchButton.setBackground(Color.GREEN);
 		toolBar.add(watchButton);
-		recordButton = new JButton("Record Decks");
+		recordButton = new JButton("Record Games");
+		recordButton.setBackground(Color.LIGHT_GRAY);
 		recordButton.setEnabled(false);
 		recordButton.addActionListener(this);
 		toolBar.add(recordButton);
@@ -124,13 +126,21 @@ public class HearthFrame extends JFrame implements ActionListener {
 	public void watchingFile(boolean b) {
 		isWatching = b;
 		if(b) {
-			watchButton.setText("Stop Watching");
-			watchButton.setBackground(Color.RED);
-			recordButton.setEnabled(true); //record enabled
+			SwingUtilities.invokeLater(new Runnable() { //watching running 
+				public void run() {
+					watchButton.setText("Stop Watching"); 
+					watchButton.setBackground(Color.RED);
+					recordButton.setEnabled(true); //record enabled
+				}
+			});
 		}else {
-			watchButton.setText("Start Watching");
-			watchButton.setBackground(Color.GREEN);
-			recordButton.setEnabled(false); //record disabled
+			SwingUtilities.invokeLater(new Runnable() { //watching stopped
+				public void run() {
+					watchButton.setText("Start Watching");
+					watchButton.setBackground(Color.GREEN);
+					recordButton.setEnabled(false); //record disabled
+				}
+			});
 		}
 	}
 	
@@ -153,8 +163,8 @@ public class HearthFrame extends JFrame implements ActionListener {
 				hearthTool.stopWatching();
 			}
 		}else if(e.getSource().equals(recordButton)) {
-			if(recordButton.isEnabled() && isWatching ) { //sanity check
-				hearthTool.startRecord(); //start record process 
+			if(recordButton.isEnabled()) {  //sanity check
+				hearthTool.doRecord(); //notify tool record button 
 			}
 		}
 	}
@@ -175,5 +185,24 @@ public class HearthFrame extends JFrame implements ActionListener {
 	
 	public void addOpposingCard(String string) {
 		opposingPlayed.addCard(string);
+	}
+
+
+	public void recordWaiting() {
+		SwingUtilities.invokeLater(new Runnable() { 
+			public void run() {
+				recordButton.setText("Waiting Game");
+				recordButton.setBackground(Color.YELLOW);
+			}
+		});
+	}
+
+	public void recordingStop() {
+		SwingUtilities.invokeLater(new Runnable() { 
+			public void run() {
+				recordButton.setText("Record Games");
+				recordButton.setBackground(Color.LIGHT_GRAY);
+			}
+		});
 	}
 }

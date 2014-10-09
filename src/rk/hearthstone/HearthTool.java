@@ -33,31 +33,13 @@ public class HearthTool {
 	}
 	
 	protected void parseNewLine(String s) {
-	
-		final String TRANSITION_CARD = "[Zone] ZoneChangeList.ProcessChanges() - TRANSITIONING card";
-		
-		if(s.length()>6) {
-			if(s.substring(0,6).equals("[Zone]")) { //check for [Zone]
-				Map<String,String> event = HearthstoneGame.parseEvent(s);
-				if(event.containsKey(("type"))) {
-					theFrame.writeConsole("type="+event.get("type"));
-					if(event.containsKey("name")) {
-						theFrame.writeConsole("name="+event.get("name"));
-					}else {
-						theFrame.writeConsole("name=?");
+		if(s.length()>6) {  //validate length
+			if(s.substring(0,6).equals("[Zone]")) { //if [Zone] log
+				Map<String,String> event = HearthstoneGame.parseEvent(s); //attempt to parse event
+				if(event.containsKey(("type"))) { //if event:type was parsed
+					if(theGame.getState()>0) { //if game is in recording decks state
+						theGame.handleEvent(event); //pass event to record event 
 					}
-					if(event.containsKey("from")) {
-						theFrame.writeConsole("from="+event.get("from"));
-					}else {
-						theFrame.writeConsole("from=?");
-					}
-					if(event.containsKey("to")) {
-						theFrame.writeConsole("to="+event.get("to"));
-					}else {
-						theFrame.writeConsole("to=?");
-					}
-					
-					theGame.handleEvent(event);
 				}
 			}
 		}
@@ -83,12 +65,12 @@ public class HearthTool {
 	}
 
 	public void watchFile(File file) {
-		theFrame.watchingFile(watchingFile = true); //update ui state
-		parseLog(file); //to inital parse of file
+		theFrame.watchingFile(watchingFile = true); //update UI
+		parseLog(file); //do intial parse of file
 		
 		myWatcher = new LogFileWatcher(file, this); //create a Runnable for Thread
 		watcherThread = new Thread(myWatcher); 
-		watcherThread.start();	
+		watcherThread.start();	//start watching file
 		
 		writeConsole("Started watching "+file.getAbsolutePath());
 		watchedFile = file; //save reference to watchedFile
@@ -107,20 +89,41 @@ public class HearthTool {
 	}
 
 	public void stopWatching() {
+		if(recordingDecks) { 	//if recording
+			if(theGame.getState() > HearthstoneGame.WAITING_HERO_FRIENDLY) { //if game is active
+				
+			}else { // recording but game is not active
+				theFrame.recordingStop();
+			}
+			recordingDecks = false; //recording stopped
+		}
+		
 		myWatcher.stayAlive(false); //tell Runnable to die
 		try {
-			watcherThread.join(); //wait for thread to die
+			watcherThread.join(); //wait for Thread to die
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		writeConsole("Stopped watching "+watchedFile.getAbsolutePath());
-		theFrame.watchingFile(watchingFile = false); //update ui state
+		theFrame.watchingFile(watchingFile = false); //update UI 
 	}
 
-	public void startRecord() {
-		if(watchingFile && !recordingDecks ) { //sanity check
-			theGame.reset(); //reset prepare game for first event
+	public void doRecord() {
+		if(watchingFile){ //sanity check
+			if(!recordingDecks ) { //not recording
+				theGame.reset(); //reset prepare game for first event
+				recordingDecks = true;
+			}else if(recordingDecks) {
+				theFrame.recordingStop(); //stop recording
+				recordingDecks = false;
+			}
+		}
+	}
+	
+	public void notifyGameState(int i) {
+		if(i == HearthstoneGame.WAITING_HERO_FRIENDLY) {
+			theFrame.recordWaiting(); //update the frame to show game state
 		}
 	}
 }

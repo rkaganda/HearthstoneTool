@@ -5,15 +5,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HearthstoneGame {
-	ArrayList<String> opposingDeck;
-	ArrayList<String> friendlyDeck;
-	ArrayList<String> opposingHand;
-	ArrayList<String> friendlyHand;
+	public final static int RECORD_OFF = 0;
+	public final static int WAITING_HERO_FRIENDLY = 1;
 	
-	HearthTool theTool;
+	protected int gameState;
+	
+	protected ArrayList<HearthstoneCard> opposingDeck;
+	protected ArrayList<HearthstoneCard> friendlyDeck;
+	protected ArrayList<HearthstoneCard> opposingHand;
+	protected ArrayList<HearthstoneCard> friendlyHand;
+	
+	protected HearthTool theTool;
+	
+	public HearthstoneGame() {
+		opposingDeck = new ArrayList<HearthstoneCard>();
+		friendlyDeck = new ArrayList<HearthstoneCard>();
+		opposingHand = new ArrayList<HearthstoneCard>();
+		friendlyHand = new ArrayList<HearthstoneCard>();
+	}
 	
 	public HearthstoneGame(HearthTool tool) {
+		this();
 		theTool = tool;
+		gameState = RECORD_OFF;
 	}
 	
 	public static Map<String,String> parseEvent(String s) {
@@ -39,11 +53,15 @@ public class HearthstoneGame {
 		}
 		return event;
 	}
-
+	
+	
+	
 	public void handleEvent(Map<String, String> event) {
-		if(event.containsKey("name") && event.containsKey("to") ) {
-			if(isHero(event.get("name"))  && event.get("to").equals("FRIENDLY PLAY (Hero)")) {
-				
+		if(event.containsKey("name") && event.containsKey("to") ) { 
+			if(isHero(event.get("name")) && 	// // if Hero FRIENDLY PLAY event and WAITING_HERO_FRIENDLY
+					event.get("to").equals("FRIENDLY PLAY (Hero)") 
+					&& gameState == WAITING_HERO_FRIENDLY ) { 
+				theTool.notifyGameState(WAITING_HERO_FRIENDLY);
 			}
 		}
 		if(event.containsKey("name") && event.containsKey("from") && event.containsKey("to") ) {
@@ -72,6 +90,15 @@ public class HearthstoneGame {
 	}
 
 	public void reset() {
-		//TODO
+		opposingDeck.clear();	//empty decks
+		friendlyDeck.clear();
+		opposingHand.clear();
+		friendlyHand.clear();
+		
+		theTool.notifyGameState(gameState = WAITING_HERO_FRIENDLY); //set state to wait for player hero event
+	}
+
+	public int getState() {
+		return gameState;
 	}
 }
