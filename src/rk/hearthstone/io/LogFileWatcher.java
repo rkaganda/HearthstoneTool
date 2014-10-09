@@ -1,4 +1,4 @@
-package rk.hearthstone;
+package rk.hearthstone.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +10,8 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+
+import rk.hearthstone.HearthTool;
 
 
 public class LogFileWatcher implements Runnable {

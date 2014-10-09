@@ -1,8 +1,10 @@
-package rk.hearthstone;
+package rk.hearthstone.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import rk.hearthstone.HearthTool;
 
 public class HearthstoneGame {
 	public final static int RECORD_OFF = 0;
@@ -17,6 +19,7 @@ public class HearthstoneGame {
 	
 	protected ArrayList<HearthstoneCard> opposingDeck;
 	protected ArrayList<HearthstoneCard> friendlyDeck;
+	
 	protected ArrayList<HearthstoneCard> opposingHand;
 	protected ArrayList<HearthstoneCard> friendlyHand;
 	

@@ -1,4 +1,4 @@
-package rk.hearthstone;
+package rk.hearthstone.io;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
+
+import rk.hearthstone.HearthTool;
 
 public class LogParserWorker extends SwingWorker<ArrayList<String>,Void> {	
 	protected File theFile;

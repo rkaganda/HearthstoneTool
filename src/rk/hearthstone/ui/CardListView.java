@@ -1,4 +1,4 @@
-package rk.hearthstone;
+package rk.hearthstone.ui;
 
 import java.awt.Dimension;
 

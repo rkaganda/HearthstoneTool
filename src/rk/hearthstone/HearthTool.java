@@ -4,6 +4,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
+import rk.hearthstone.io.LogFileWatcher;
+import rk.hearthstone.io.LogParserWorker;
+import rk.hearthstone.model.HearthstoneGame;
+import rk.hearthstone.ui.HearthFrame;
+
 public class HearthTool {
 	protected HearthFrame theFrame;
 	protected boolean watchingFile, recordingDecks;

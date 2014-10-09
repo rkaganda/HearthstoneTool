@@ -1,4 +1,4 @@
-package rk.hearthstone;
+package rk.hearthstone.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,6 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+
+import rk.hearthstone.HearthTool;
 
 public class HearthFrame extends JFrame implements ActionListener {
 	/**

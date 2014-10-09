@@ -1,4 +1,4 @@
-package rk.hearthstone;
+package rk.hearthstone.model;
 
 import java.util.HashMap;
 import java.util.Map;
