@@ -70,4 +70,8 @@ public class HearthstoneGame {
 		}
 		return isHero;
 	}
+
+	public void reset() {
+		//TODO
+	}
 }

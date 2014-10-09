@@ -6,11 +6,12 @@ import java.util.Map;
 
 public class HearthTool {
 	protected HearthFrame theFrame;
-	protected boolean watchingFile;
-	protected boolean fileWatcher;
+	protected boolean watchingFile, recordingDecks;
 	protected File watchedFile;
 	protected ArrayList<String> lastLog;
-	HearthstoneGame theGame;
+	protected HearthstoneGame theGame;
+	protected LogFileWatcher myWatcher;
+	protected Thread watcherThread;
 	
 	public static void main(String args[]) {
 		HearthTool myTool = new HearthTool();
@@ -19,6 +20,7 @@ public class HearthTool {
 	public HearthTool() {
 		theFrame = new HearthFrame(this);
 		watchingFile = false;
+		recordingDecks = false;
 		theGame = new HearthstoneGame(this);
 	}
 	
@@ -81,18 +83,19 @@ public class HearthTool {
 	}
 
 	public void watchFile(File file) {
-		theFrame.watchingFile(watchingFile = true);
-		parseLog(file);
+		theFrame.watchingFile(watchingFile = true); //update ui state
+		parseLog(file); //to inital parse of file
 		
-		LogFileWatcher myWatcher = new LogFileWatcher(file, this);
-		Thread myThread = new Thread(myWatcher);
-		myThread.start();
-		writeConsole("Watching "+file.getAbsolutePath());
-		watchedFile = file;
+		myWatcher = new LogFileWatcher(file, this); //create a Runnable for Thread
+		watcherThread = new Thread(myWatcher); 
+		watcherThread.start();	
+		
+		writeConsole("Started watching "+file.getAbsolutePath());
+		watchedFile = file; //save reference to watchedFile
 	}
 
 	public void notifyFileUpdated() {
-		parseLog(watchedFile);
+		parseLog(watchedFile); //parse the updated file
 	}
 
 	public void friendlyPlayed(Map<String, String> event) {
@@ -101,5 +104,23 @@ public class HearthTool {
 
 	public void opposingPlayed(Map<String, String> event) {
 		theFrame.addOpposingCard(event.get("name"));
+	}
+
+	public void stopWatching() {
+		myWatcher.stayAlive(false); //tell Runnable to die
+		try {
+			watcherThread.join(); //wait for thread to die
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		writeConsole("Stopped watching "+watchedFile.getAbsolutePath());
+		theFrame.watchingFile(watchingFile = false); //update ui state
+	}
+
+	public void startRecord() {
+		if(watchingFile && !recordingDecks ) { //sanity check
+			theGame.reset(); //reset prepare game for first event
+		}
 	}
 }
