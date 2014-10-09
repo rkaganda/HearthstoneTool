@@ -48,10 +48,14 @@ public class HearthstoneGame {
 		}
 		if(event.containsKey("name") && event.containsKey("from") && event.containsKey("to") ) {
 			if( event.get("from").trim().equals("FRIENDLY HAND") &&
-				(event.get("to").trim().equals("") || event.get("to").trim().equals("FRIENDLY PLAY"))) {
+				(event.get("to").trim().equals("") || 
+						event.get("to").trim().equals("FRIENDLY PLAY") || 
+						event.get("to").trim().equals("FRIENDLY PLAY (Weapon)"))) {
 				theTool.friendlyPlayed(event);
 			}else if( event.get("from").trim().equals("OPPOSING HAND")  && 
-					(event.get("to").trim().equals("") || event.get("to").trim().equals("OPPOSING PLAY"))) {
+					(event.get("to").trim().equals("") || 
+							event.get("to").trim().equals("OPPOSING PLAY") ||
+							event.get("to").trim().equals("OPPOSING PLAY (Weapon)"))) {
 				theTool.opposingPlayed(event);
 			}
 		}
