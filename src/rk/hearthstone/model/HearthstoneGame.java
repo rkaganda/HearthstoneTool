@@ -94,7 +94,6 @@ public class HearthstoneGame {
 			
 			// if card is Hero
 			if(isHero(event.get("name"))) { 
-				System.out.println("gamestate="+gameState);
 				if( event.get("to").equals("FRIENDLY PLAY (Hero)") // Hero -> FRIENDLY PLAY game start
 						&& (gameState == WAITING_HERO_FRIENDLY 
 						|| gameState == EVENT_HERO_GRAVEYARD) ) {

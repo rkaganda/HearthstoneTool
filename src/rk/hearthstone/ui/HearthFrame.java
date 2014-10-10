@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import rk.hearthstone.HearthTool;
 import rk.hearthstone.model.HearthstoneCard;
@@ -64,6 +65,11 @@ public class HearthFrame extends JFrame implements ActionListener {
 
 	
 	public void setupUI() {
+		try {
+		    UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName() );
+		 } catch (Exception e) {
+		            e.printStackTrace();
+		 }
 		menubar = new JMenuBar(); 
 		fileMenu = new JMenu("File");
 		watchMenu = new JMenu("Watch");

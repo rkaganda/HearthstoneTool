@@ -118,11 +118,10 @@ public class HearthTool {
 	
 	//debug
 	public void logEvent(Map<String,String> e) {
-		System.out.print("event:");
 		for(String key:e.keySet()) {
 			theFrame.writeConsole(key+"="+e.get(key));
 		}
-		theFrame.writeConsoleLine("\n");
+		theFrame.writeConsole("\n");
 	}
 	
 	public void notifyGameState(int i) {
