@@ -2,10 +2,13 @@ package rk.hearthstone;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import rk.hearthstone.io.LogFileWatcher;
 import rk.hearthstone.io.LogParserWorker;
+import rk.hearthstone.model.HearthstoneCard;
+import rk.hearthstone.model.HearthstoneCardZone;
 import rk.hearthstone.model.HearthstoneGame;
 import rk.hearthstone.ui.HearthFrame;
 
@@ -33,7 +36,7 @@ public class HearthTool {
 		if(file!=null) {
 			(new LogParserWorker(file,this)).execute(); //run thread
 		}else {
-			//System.out.println("wow");
+			//null file, go figure
 		}
 	}
 	
@@ -85,14 +88,6 @@ public class HearthTool {
 		parseLog(watchedFile); //parse the updated file
 	}
 
-	public void friendlyPlayed(Map<String, String> event) {
-		theFrame.addFriendlyCard(event.get("name"));
-	}
-
-	public void opposingPlayed(Map<String, String> event) {
-		theFrame.addOpposingCard(event.get("name"));
-	}
-
 	public void stopWatching() {
 		if(recordingDecks) { 	//if recording
 			if(theGame.getState() > HearthstoneGame.WAITING_HERO_FRIENDLY) { //if game is active
@@ -107,7 +102,6 @@ public class HearthTool {
 		try {
 			watcherThread.join(); //wait for Thread to die
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		writeConsole("Stopped watching "+watchedFile.getAbsolutePath());
@@ -117,13 +111,22 @@ public class HearthTool {
 	public void doRecord() {
 		if(watchingFile){ //sanity check
 			if(!recordingDecks ) { //not recording
-				theGame.reset(); //reset prepare game for first event
+				theFrame.updateZones(theGame.reset()); //reset the game, push new zones to view				
 				recordingDecks = true;
 			}else if(recordingDecks) {
 				theFrame.recordingStop(); //stop recording
 				recordingDecks = false;
 			}
 		}
+	}
+	
+	//debug
+	public void logEvent(Map<String,String> e) {
+		System.out.print("event:");
+		for(String key:e.keySet()) {
+			System.out.print(key+"="+e.get(key));
+		}
+		System.out.print("\n");
 	}
 	
 	public void notifyGameState(int i) {

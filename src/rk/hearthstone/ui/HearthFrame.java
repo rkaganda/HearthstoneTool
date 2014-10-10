@@ -6,6 +6,10 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -23,6 +27,8 @@ import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
 import rk.hearthstone.HearthTool;
+import rk.hearthstone.model.HearthstoneCard;
+import rk.hearthstone.model.HearthstoneCardZone;
 
 public class HearthFrame extends JFrame implements ActionListener {
 	/**
@@ -36,10 +42,11 @@ public class HearthFrame extends JFrame implements ActionListener {
 	protected JMenu fileMenu, watchMenu;
 	protected JMenuItem loadFileItem;
 	
+	protected JPanel cardViews;
 	protected JButton watchButton, recordButton;
 	
-	protected CardListView playerPlayed;
-	protected CardListView opposingPlayed;
+	
+	protected Map<String,CardZoneView> cardListViews;
 	
 	protected boolean isWatching;
 
@@ -83,13 +90,9 @@ public class HearthFrame extends JFrame implements ActionListener {
 		recordButton.addActionListener(this);
 		toolBar.add(recordButton);
 		
-		JPanel cardViews = new JPanel();
+		cardViews = new JPanel();
 		cardViews.setLayout(new BoxLayout(cardViews, BoxLayout.X_AXIS));
-		playerPlayed = new CardListView("Player Played");
-		opposingPlayed = new CardListView("Opposing Played");
-		cardViews.add(playerPlayed);
 		cardViews.add(Box.createHorizontalGlue());
-		cardViews.add(opposingPlayed);
 		
 		
 		JPanel consolePanel = new JPanel();
@@ -180,16 +183,16 @@ public class HearthFrame extends JFrame implements ActionListener {
             hearthTool.watchFile(file); //send File to tool for watching
         }
 	}
-
-	public void addFriendlyCard(String string) {
-		playerPlayed.addCard(string);
+	
+	public void updateZones(List<HearthstoneCardZone> zones) {
+		cardViews.removeAll(); //clear view
+		for(HearthstoneCardZone z:zones) {
+			CardZoneView view = new CardZoneView(z); //create new view
+			cardViews.add(view); //add view to panel
+		}
+		pack();
 	}
 	
-	public void addOpposingCard(String string) {
-		opposingPlayed.addCard(string);
-	}
-
-
 	public void recordWaiting() {
 		SwingUtilities.invokeLater(new Runnable() { 
 			public void run() {

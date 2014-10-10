@@ -10,7 +10,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-public class CardListView extends JPanel {
+import rk.hearthstone.model.HearthstoneCard;
+import rk.hearthstone.model.HearthstoneCardZone;
+import rk.hearthstone.model.HearthstoneCardZoneListener;
+
+public class CardZoneView extends JPanel implements HearthstoneCardZoneListener {
 	/**
 	 * 
 	 */
@@ -19,14 +23,16 @@ public class CardListView extends JPanel {
 	protected JList<String> cardList;
 	protected JLabel listLabel;
 	protected DefaultListModel<String> listModel;
+	protected HearthstoneCardZone zone;
 	
-	public CardListView(String l) {
-		listLabel = new JLabel(l);
+	public CardZoneView(HearthstoneCardZone z) {
+		listLabel = new JLabel(z.getName());
 		listModel = new DefaultListModel<String>();
 		
 		cardList = new JList<String>(listModel);
 		
-		
+		zone = z;
+		zone.addListener(this);
 		
 		initUI();
 	}
@@ -44,12 +50,15 @@ public class CardListView extends JPanel {
 		add(listLabel);
 		add(listScroller);
 	}
-	
-	public void addCard(String c) {
-		listModel.addElement(c);
+
+	@Override
+	public void cardAdded(HearthstoneCard card) {
+		listModel.addElement(card.getAttributes().get("name"));
 	}
-	
-	public void removeCard(String c) {
-		listModel.removeElement(c);
+
+	@Override
+	public void cardRemoved(HearthstoneCard card) {
+		listModel.removeElement(card.getAttributes().get("name"));
 	}
+
 }

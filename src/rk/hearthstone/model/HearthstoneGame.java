@@ -2,6 +2,7 @@ package rk.hearthstone.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import rk.hearthstone.HearthTool;
@@ -11,25 +12,36 @@ public class HearthstoneGame {
 	public final static int WAITING_HERO_FRIENDLY = 1; //game has ended waiting for event type=move name=(Hero) from="" -> to="FRIENDLY PLAY" 
 	public final static int EVENT_HERO_FRIENDLY_PLAY = 2; //occurs after event type=move name=(Hero) from="" -> to="FRIENDLY PLAY" 
 	public final static int DEALING_FRIENDLY_DECK = 3; //game state while FRIENDLY DECK is dealt
-	public final static int EVENT_HERO_OPPOSING_PLAY = 4; //TODO 
+	public final static int EVENT_HERO_OPPOSING_PLAY = 4; //TODO next event to create
 	public final static int DEALING_OPPOSING_DECK = 5; 
 
 	
 	protected int gameState;
 	
-	protected ArrayList<HearthstoneCard> opposingDeck;
-	protected ArrayList<HearthstoneCard> friendlyDeck;
+	//stores the state of each zone, stored in Map as id=>HearthstoneCard
+	protected HearthstoneCardZone opposingDeck; //deck zones
+	protected HearthstoneCardZone friendlyDeck;
 	
-	protected ArrayList<HearthstoneCard> opposingHand;
-	protected ArrayList<HearthstoneCard> friendlyHand;
+	protected HearthstoneCardZone opposingHand; //hand zones
+	protected HearthstoneCardZone friendlyHand;
+	
+	protected HearthstoneCardZone friendlyPlay; //play zone
+	protected HearthstoneCardZone opposingPlay;
+	
+	protected HearthstoneCardZone friendlyGraveyard; //graveyard zone
+	protected HearthstoneCardZone opposingGraveyard;
 	
 	protected HearthTool theTool;
 	
 	public HearthstoneGame() {
-		opposingDeck = new ArrayList<HearthstoneCard>();
-		friendlyDeck = new ArrayList<HearthstoneCard>();
-		opposingHand = new ArrayList<HearthstoneCard>();
-		friendlyHand = new ArrayList<HearthstoneCard>();
+		friendlyDeck = new HearthstoneCardZone("friendlyDeck");
+		opposingDeck = new HearthstoneCardZone("opposingDeck");
+		friendlyHand = new HearthstoneCardZone("friendlyHand");
+		opposingHand = new HearthstoneCardZone("opposingHand");
+		friendlyPlay = new HearthstoneCardZone("friendlyPlay");
+		opposingPlay = new HearthstoneCardZone("opposingPlay");
+		friendlyGraveyard = new HearthstoneCardZone("friendlyGraveyard");
+		opposingGraveyard = new HearthstoneCardZone("opposingGraveyard");
 	}
 	
 	public HearthstoneGame(HearthTool tool) {
@@ -43,7 +55,6 @@ public class HearthstoneGame {
 		s = s.substring(s.indexOf("[Zone]")+6); //remove [Zone]
 		if(s.contains("] zone from")) { //parse event type=move params name, id, to, from
 			event.put("type","move");
-			//System.out.println(s); 
 			String bracket = s.substring(s.indexOf("["),s.indexOf("]"));
 			if(bracket.contains("name=")) { //parse name
 				event.put("name", bracket.substring(bracket.indexOf("name=")+5,bracket.indexOf("id=")).trim());
@@ -116,26 +127,54 @@ public class HearthstoneGame {
 				(event.get("to").equals("") || 
 						event.get("to").equals("FRIENDLY PLAY") || 
 						event.get("to").equals("FRIENDLY PLAY (Weapon)"))) {
-				theTool.friendlyPlayed(event); //notify tool friendly card played event
+				friendlyPlay(event);
 			}else if( event.get("from").equals("OPPOSING HAND")  && //if card OPPOSING HAND -> OPPOSING PLAY
 					(event.get("to").equals("") || 
 						event.get("to").equals("OPPOSING PLAY") ||
 						event.get("to").equals("OPPOSING PLAY (Weapon)"))) {
-				theTool.opposingPlayed(event);	//notify tool opposing card played event
+				opposingPlay(event);
 			}
 		}
+	}
+	
+	protected void friendlyPlay(Map<String, String> event) {
+		theTool.logEvent(event); //debug
+		HearthstoneCard card = friendlyDeck.removeCard(event.get("id")); //remove card from friendly deck
+		if(card==null) { //TODO this quickfix assumes card was played from hand, should take card from correct zone
+			card = new HearthstoneCard(); //create a new card
+			card.getAttributes().put("id", event.get("id")); //set card id
+		}
+		card.cardAttributes.put("name", event.get("name"));
+		friendlyPlay.addCard(card);	//place card in friendly play
+		
+		//TODO notify tool
+	}
+	
+	protected void opposingPlay(Map<String, String> event) {
+		theTool.logEvent(event); //debug
+		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from opposing deck
+		if(card==null) { //TODO this quickfix assumes card was played from hand, should take card from correct zone
+			card = new HearthstoneCard(); //create a new card
+			card.getAttributes().put("id", event.get("id")); //set card id
+		}
+		card.cardAttributes.put("name", event.get("name"));
+		opposingPlay.addCard(card);	//place card in opposing play
+		
+		//TODO notify tool
 	}
 	
 	protected void dealOpposingDeck(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(); //create a new card
 		card.getAttributes().put("id", event.get("id")); //set card id
-		opposingDeck.add(card); //add card to deck
+		card.cardAttributes.put("name", "unknown"); //cards from DECK are unknown
+		opposingDeck.addCard(card); //add card to deck
 	}
 
 	protected void dealFriendlyDeck(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(); //create a new card
 		card.getAttributes().put("id", event.get("id")); //set card id
-		friendlyDeck.add(card); //add card to deck
+		card.cardAttributes.put("name", "unknown"); //cards from DECK are unknown
+		friendlyDeck.addCard(card); //add card to deck
 	}
 
 	protected void doGameStart(Map<String, String> event) {
@@ -160,13 +199,29 @@ public class HearthstoneGame {
 		return isHero;
 	}
 
-	public void reset() {
-		opposingDeck.clear();	//empty decks
-		friendlyDeck.clear();
-		opposingHand.clear();
-		friendlyHand.clear();
+	public List<HearthstoneCardZone> reset() {
+		List<HearthstoneCardZone> zones = new ArrayList<HearthstoneCardZone>();
 		
+		opposingDeck.clearZone();	//empty zones
+		friendlyDeck.clearZone();
+		opposingHand.clearZone();
+		friendlyHand.clearZone();
+		opposingPlay.clearZone();
+		friendlyPlay.clearZone();
+		opposingGraveyard.clearZone();
+		friendlyGraveyard.clearZone();
+		zones.add(opposingDeck);
+		zones.add(friendlyDeck);
+		zones.add(opposingHand);
+		zones.add(friendlyHand);
+		zones.add(opposingPlay);
+		zones.add(friendlyPlay);
+		zones.add(opposingGraveyard);
+		zones.add(friendlyGraveyard);
+	
 		theTool.notifyGameState(gameState = WAITING_HERO_FRIENDLY); //set state to wait for player hero event
+		
+		return zones;
 	}
 
 	public int getState() {

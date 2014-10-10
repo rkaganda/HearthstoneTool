@@ -38,7 +38,6 @@ public class LogFileWatcher implements Runnable {
 					StandardWatchEventKinds.ENTRY_MODIFY,
 					StandardWatchEventKinds.ENTRY_DELETE);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -53,7 +52,6 @@ public class LogFileWatcher implements Runnable {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -73,9 +71,7 @@ public class LogFileWatcher implements Runnable {
 					}else if(StandardWatchEventKinds.ENTRY_MODIFY == kind) {
 						final WatchEvent<Path> wePath = (WatchEvent<Path>) watchEvent;
 						final Path newPath = wePath.context();
-						System.out.println("Path modified: " + newPath);
 						if(newPath.toString().equals(fileName)) {
-							System.out.println("match");
 							theTool.notifyFileUpdated();
 						}
 					}

@@ -45,10 +45,8 @@ public class LogParserWorker extends SwingWorker<ArrayList<String>,Void> {
 		try {
 			theTool.logLoaded(get(),theFile.getName());
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
