@@ -102,6 +102,7 @@ public class HearthstoneGame {
 	public void handleEvent(Map<String, String> event) { 
 		//TODO check if event has been handed over
 		if(event.get("type").equals("move")) { //move events
+			
 			// if card is Hero
 			if(isHero(event.get("name"))) { 
 				if(event.get("to").equals("FRIENDLY PLAY (Hero)")) {	// Hero -> FRIENDLY PLAY, possible game start
@@ -117,8 +118,15 @@ public class HearthstoneGame {
 				}
 			}
 		
+			// move * from * to FRIENDLY PLAY (Hero Power)
+			if(	event.get("to").equals("FRIENDLY PLAY (Hero Power)")) {
+				event.put("eventHandled", "true"); //flag event as handled
+			}
+			if( event.get("to").equals("OPPOSING PLAY (Hero Power)")) {
+				event.put("eventHandled", "true"); //flag event as handled
+			}
 			
-			// move card from unknown to DECK
+			// move * from unknown to DECK
 			if( event.get("from").equals("unknown") &&
 				event.get("to").equals("FRIENDLY DECK")) {
 					dealFriendlyDeck(event);
@@ -128,12 +136,12 @@ public class HearthstoneGame {
 					dealOpposingDeck(event);
 			}
 			
-			// move unknown -> PLAY events
+			// move * from unknown -> FRIENDLY HAND
 			if( event.get("from").equals("unknown") && 	// if card unknown -> FRIENDLY HAND
 					event.get("to").equals("FRIENDLY HAND")) {
 				moveUnknowToFriendlyHand(event);
 			}else if( event.get("from").equals("unknown") && 	// if card unknown -> OPPOSING HAND
-					event.get("to").equals("FRIENDLY HAND")) {
+					event.get("to").equals("OPPOSING HAND")) {
 				moveUnknowToOpposingHand(event);
 			}
 			
