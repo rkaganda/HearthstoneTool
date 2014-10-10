@@ -8,12 +8,15 @@ import java.util.Map;
 import rk.hearthstone.HearthTool;
 
 public class HearthstoneGame {
+	//TODO remove unneeded states
 	public final static int DISABLE = 0;
-	public final static int WAITING_HERO_FRIENDLY = 1; //game has ended waiting for event type=move name=(Hero) from="" -> to="FRIENDLY PLAY" 
-	public final static int EVENT_HERO_FRIENDLY_PLAY = 2; //occurs after event type=move name=(Hero) from="" -> to="FRIENDLY PLAY" 
+	public final static int WAITING_HERO = 1; //game has ended waiting for a hero to enter play
+	public final static int HERO_PLAY = 2; //hero as entered play
 	public final static int DEALING_FRIENDLY_DECK = 3; //game state while FRIENDLY DECK is dealt
 	public final static int DEALING_OPPOSING_DECK = 5; 
-	public final static int EVENT_HERO_GRAVEYARD = 100; // hero is in graveyard
+	public final static int HERO_GRAVEYARD = 100; // hero is in graveyard
+	
+	protected Map<String,String> gameFlags; //stores game state flags
 	
 	protected int gameState;
 	
@@ -49,12 +52,15 @@ public class HearthstoneGame {
 		zones.add(friendlyPlay);
 		zones.add(opposingGraveyard);
 		zones.add(friendlyGraveyard);
+		
+		gameFlags = new HashMap<String,String>();
+		gameFlags.put("gameRunning","false");
 	}
 	
 	public HearthstoneGame(HearthTool tool) {
 		this();
 		theTool = tool;
-		gameState = WAITING_HERO_FRIENDLY;
+		gameState = WAITING_HERO; //waiting for hero to enter play zone
 	}
 	
 	public static Map<String,String> parseEvent(String s) {
@@ -98,11 +104,14 @@ public class HearthstoneGame {
 		if(event.get("type").equals("move")) { //move events
 			// if card is Hero
 			if(isHero(event.get("name"))) { 
-				if( event.get("to").equals("FRIENDLY PLAY (Hero)") // Hero -> FRIENDLY PLAY game start
-						&& (gameState == WAITING_HERO_FRIENDLY 
-						|| gameState == EVENT_HERO_GRAVEYARD) ) {
-					doGameStart(event); //process starting game event
-				}else if( event.get("to").equals("OPPOSING GRAVEYARD") || //Hero -> GRAVEYARD game over
+				if(event.get("to").equals("FRIENDLY PLAY (Hero)")) {	// Hero -> FRIENDLY PLAY, possible game start
+					moveHeroUnknownFriendlyPlay(event); //process starting game event
+				}
+				if(event.get("to").equals("OPPOSING PLAY (Hero)")) { // Hero -> OPPOSING PLAY, possible game start
+					moveHeroUnknownOpposingPlay(event); //process starting game event
+				}
+				
+				if( event.get("to").equals("OPPOSING GRAVEYARD") || //Hero -> GRAVEYARD game over
 						event.get("to").equals("FRIENDLY GRAVEYARD")) {
 					doGameOver(event); //process game over event
 				}
@@ -237,15 +246,32 @@ public class HearthstoneGame {
 		friendlyDeck.addCard(card); //add card to deck
 		event.put("eventHandled", "true"); //flag event as handled
 	}
-
-	protected void doGameStart(Map<String, String> event) {
-		reset();
-		theTool.notifyGameState(gameState = EVENT_HERO_FRIENDLY_PLAY); //notify Tool game started
+	
+	protected void moveHeroUnknownFriendlyPlay(Map<String, String> event) {
+		if(gameFlags.get("gameRunning").equals("false")) { //make sure game isn't already running
+			doGameStart(event);
+		}
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
+	protected void moveHeroUnknownOpposingPlay(Map<String, String> event) {
+		if(gameFlags.get("gameRunning").equals("false")) { //make sure game isn't already running
+			doGameStart(event);
+		}
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	protected void doGameStart(Map<String, String> event) {
+		reset();	
+		//TODO MERGE notifyGameState with gameFlags
+		gameFlags.put("gameRunning","true");
+		theTool.notifyGameState(gameState = HERO_PLAY); //notify Tool game started 
+	}
+	
 	protected void doGameOver(Map<String, String> event) {
-		theTool.notifyGameState(gameState = EVENT_HERO_GRAVEYARD); //notify Tool game over
+		//TODO gameFlags gameRunning = false
+		//TODO MERGE notifyGameState with gameFlags
+		theTool.notifyGameState(gameState = HERO_GRAVEYARD); //notify Tool game over
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	

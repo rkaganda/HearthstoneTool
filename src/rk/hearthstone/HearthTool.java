@@ -87,7 +87,7 @@ public class HearthTool {
 
 	public void stopWatching() {
 		if(recordingDecks) { 	//if recording
-			if(theGame.getState() > HearthstoneGame.WAITING_HERO_FRIENDLY) { //if game is active
+			if(theGame.getState() > HearthstoneGame.WAITING_HERO) { //if game is active
 				
 			}else { // recording but game is not active
 				theFrame.recordingStop();
@@ -132,22 +132,22 @@ public class HearthTool {
 	
 	public void notifyGameState(int i) {
 		//TODO remove unneeded game states, only notify of game start and game end
-		if(i == HearthstoneGame.WAITING_HERO_FRIENDLY) {
+		if(i == HearthstoneGame.WAITING_HERO) {
 			theFrame.recordWaiting(); 	//update toolbar
-			theFrame.writeConsoleLine("Game State: WAITING_HERO_FRIENDLY");
-		}else if(i==HearthstoneGame.EVENT_HERO_FRIENDLY_PLAY) {
+			theFrame.writeConsoleLine("Game State: WAITING_HERO");
+		}else if(i==HearthstoneGame.HERO_PLAY) {
 			theFrame.gameStarted(); //update UI
 			theFrame.updateZones(theGame.getZones()); //update zone views
-			theFrame.writeConsoleLine("Game State: EVENT_HERO_FRIENDLY_PLAY");
+			theFrame.writeConsoleLine("Game State: HERO_PLAY");
 		}else if(i==HearthstoneGame.DEALING_FRIENDLY_DECK) {
 			theFrame.gameStarted(); //update UI 
 			theFrame.writeConsoleLine("Game State: DEALING_FRIENDLY_DECK");
 		}else if(i==HearthstoneGame.DEALING_OPPOSING_DECK) {
 			theFrame.gameStarted(); //update UI 
 			theFrame.writeConsoleLine("Game State: DEALING_OPPOSING_DECK");
-		}else if(i==HearthstoneGame.EVENT_HERO_GRAVEYARD) {
+		}else if(i==HearthstoneGame.HERO_GRAVEYARD) {
 			theFrame.recordWaiting(); 	//update toolbar
-			theFrame.writeConsoleLine("Game State: EVENT_HERO_GRAVEYARD");
+			theFrame.writeConsoleLine("Game State: HERO_GRAVEYARD");
 		}
 	}
 }
