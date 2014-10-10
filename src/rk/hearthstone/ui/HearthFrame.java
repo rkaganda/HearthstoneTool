@@ -114,6 +114,15 @@ public class HearthFrame extends JFrame implements ActionListener {
 		final String f = s;
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
+				toolConsole.append(f);
+			}
+		});
+	}
+	
+	public void writeConsoleLine(String s) {
+		final String f = s;
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
 				toolConsole.append(f+"\n");
 			}
 		});
