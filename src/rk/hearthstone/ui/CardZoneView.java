@@ -53,14 +53,25 @@ public class CardZoneView extends JPanel implements HearthstoneCardZoneListener 
 
 	@Override
 	public void cardAdded(HearthstoneCard card) {
-		//TODO render card
-		listModel.addElement(card.getAttributes().get("name"));
+		//TODO fix and render
+		resetListModel();
 	}
 
 	@Override
 	public void cardRemoved(HearthstoneCard card) {
-		//TODO render card
-		listModel.removeElement(card.getAttributes().get("name"));
+		//TODO fix and render
+		resetListModel();
 	}
-
+	
+	
+	protected void resetListModel() {
+		listModel.removeAllElements();
+		for(HearthstoneCard card:zone.getCards()) {
+			if(card.getAttributes().get("name").equals("unknown")) {
+				listModel.addElement(card.getAttributes().get("id"));
+			}else {
+				listModel.addElement(card.getAttributes().get("name"));
+			}
+		}
+	}
 }

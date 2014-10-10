@@ -44,9 +44,11 @@ public class HearthTool {
 		if(s.length()>6) {  //validate length
 			if(s.substring(0,6).equals("[Zone]")) { //if [Zone] log
 				Map<String,String> event = HearthstoneGame.parseEvent(s); //attempt to parse event
-				if(event.containsKey(("type"))) { //if event:type was parsed
-					logEvent(event); //debug
+				if(event.containsKey(("type"))) { //if event was parsed
 					theGame.handleEvent(event); //pass event to game to handle
+					if(!event.containsKey("eventHandled")) { //check if event was handled
+						logEvent(event); //debug
+					}
 				}
 			}
 		}
@@ -116,32 +118,36 @@ public class HearthTool {
 		}
 	}
 	
+	public void writeConsole(String s) {
+		theFrame.writeConsole(s);
+	}
+	
 	//debug
 	public void logEvent(Map<String,String> e) {
 		for(String key:e.keySet()) {
-			theFrame.writeConsole(key+"="+e.get(key));
+			theFrame.writeConsole(key+"='"+e.get(key)+"' ");
 		}
 		theFrame.writeConsole("\n");
 	}
 	
 	public void notifyGameState(int i) {
+		//TODO remove unneeded game states, only notify of game start and game end
 		if(i == HearthstoneGame.WAITING_HERO_FRIENDLY) {
 			theFrame.recordWaiting(); 	//update toolbar
-			theFrame.writeConsole("Game State: WAITING_HERO_FRIENDLY");
+			theFrame.writeConsoleLine("Game State: WAITING_HERO_FRIENDLY");
 		}else if(i==HearthstoneGame.EVENT_HERO_FRIENDLY_PLAY) {
 			theFrame.gameStarted(); //update UI
 			theFrame.updateZones(theGame.getZones()); //update zone views
-			theFrame.writeConsole("Game State: EVENT_HERO_FRIENDLY_PLAY");
+			theFrame.writeConsoleLine("Game State: EVENT_HERO_FRIENDLY_PLAY");
 		}else if(i==HearthstoneGame.DEALING_FRIENDLY_DECK) {
 			theFrame.gameStarted(); //update UI 
-			theFrame.writeConsole("Game State: DEALING_FRIENDLY_DECK");
+			theFrame.writeConsoleLine("Game State: DEALING_FRIENDLY_DECK");
 		}else if(i==HearthstoneGame.DEALING_OPPOSING_DECK) {
 			theFrame.gameStarted(); //update UI 
-			theFrame.writeConsole("Game State: DEALING_OPPOSING_DECK");
+			theFrame.writeConsoleLine("Game State: DEALING_OPPOSING_DECK");
 		}else if(i==HearthstoneGame.EVENT_HERO_GRAVEYARD) {
-			//TODO hero died event
 			theFrame.recordWaiting(); 	//update toolbar
-			theFrame.writeConsole("Game State: EVENT_HERO_GRAVEYARD");
+			theFrame.writeConsoleLine("Game State: EVENT_HERO_GRAVEYARD");
 		}
 	}
 }

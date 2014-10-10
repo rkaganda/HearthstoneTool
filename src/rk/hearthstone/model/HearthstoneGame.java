@@ -66,22 +66,26 @@ public class HearthstoneGame {
 			if(bracket.contains("name=")) { //parse name
 				event.put("name", bracket.substring(bracket.indexOf("name=")+5,bracket.indexOf("id=")).trim());
 			}else{
-				event.put("name","");
+				event.put("name","unknown");
 			}
+			
 			if(bracket.contains("id=")) { //parse id
 				event.put("id", bracket.substring(bracket.indexOf("id=")+3,  // substring id= till whitespace
 						bracket.substring(bracket.indexOf("id=")).indexOf(" ") + bracket.indexOf("id=")));
 			}else {
-				event.put("id","");
+				event.put("id","unknown");
 			}
 			
 			//parse from
 			event.put("from", s.substring(s.indexOf("] zone from ")+12, s.indexOf("-> ")).trim());
+			if(event.get("from").equals("")) {
+				event.put("from","unknown");
+			}
 			
 			if(s.indexOf("-> ")+3!=s.length()-1) {
 				event.put("to", s.substring(s.indexOf("-> ")+3,s.length()).trim());
 			}else {
-				event.put("to","");
+				event.put("to","unknown");
 			}
 		}
 		return event;
@@ -90,8 +94,8 @@ public class HearthstoneGame {
 	
 	
 	public void handleEvent(Map<String, String> event) { 
+		//TODO check if event has been handed over
 		if(event.get("type").equals("move")) { //move events
-			
 			// if card is Hero
 			if(isHero(event.get("name"))) { 
 				if( event.get("to").equals("FRIENDLY PLAY (Hero)") // Hero -> FRIENDLY PLAY game start
@@ -104,87 +108,172 @@ public class HearthstoneGame {
 				}
 			}
 		
-		
-			// move "" : "" -> "FRIENDLY DECK"
-			if( event.get("name").equals("") &&
-				event.get("from").equals("") &&
+			
+			// move card from unknown to DECK
+			if( event.get("from").equals("unknown") &&
 				event.get("to").equals("FRIENDLY DECK")) {
-					theTool.notifyGameState(gameState = DEALING_FRIENDLY_DECK); //start DEALING_FRIENDLY_DECK state
 					dealFriendlyDeck(event);
 			}
-			
-			// move "" : "" -> "OPPOSING DECK"
-			if( event.get("name").equals("") &&
-				event.get("from").equals("") &&
+			if( event.get("from").equals("unknown") &&
 				event.get("to").equals("OPPOSING DECK")) {
-					theTool.notifyGameState(gameState = DEALING_OPPOSING_DECK); //start DEALING_OPPOSING_DECK state
 					dealOpposingDeck(event);
 			}
 			
+			// move unknown -> PLAY events
+			if( event.get("from").equals("unknown") && 	// if card unknown -> FRIENDLY HAND
+					event.get("to").equals("FRIENDLY HAND")) {
+				moveUnknowToFriendlyHand(event);
+			}else if( event.get("from").equals("unknown") && 	// if card unknown -> OPPOSING HAND
+					event.get("to").equals("FRIENDLY HAND")) {
+				moveUnknowToOpposingHand(event);
+			}
 			
-			// move HAND -> PLAY events
+			// move card DECK -> HAND events
+			if( event.get("from").equals("FRIENDLY DECK") && 	// if card FRIENDLY DECK -> FRIENDLY HAND
+					event.get("to").equals("FRIENDLY HAND")) {
+				moveFriendlyDeckFriendlyHand(event);
+			}else if( event.get("from").equals("OPPOSING DECK") && 	// if card OPPOSING DECK -> OPPOSING HAND
+					event.get("to").equals("OPPOSING HAND")) {
+				moveOpposingDeckOpposingHand(event);
+			}
+			
+			// move card from HAND to DECK
+			if( event.get("from").equals("FRIENDLY HAND") &&
+					event.get("to").equals("FRIENDLY DECK")) {
+				moveFriendlyHandFriendlyDeck(event);
+			}
+			if( event.get("from").equals("OPPOSING HAND") &&
+				event.get("to").equals("OPPOSING DECK")) {
+				moveOpposingHandOpposingDeck(event);
+			}
+			
+			// move card HAND -> PLAY events
 			if( event.get("from").equals("FRIENDLY HAND") && 	// if card FRIENDLY HAND -> FRIENDLY PLAY
-				(event.get("to").equals("") || 
-						event.get("to").equals("FRIENDLY PLAY") || 
-						event.get("to").equals("FRIENDLY PLAY (Weapon)"))) {
-				friendlyPlay(event);
+				(event.get("to").equals("FRIENDLY PLAY") || 
+				event.get("to").equals("FRIENDLY PLAY (Weapon)"))) {
+				moveFriendlyHandFriendlyPlay(event);
 			}else if( event.get("from").equals("OPPOSING HAND")  && //if card OPPOSING HAND -> OPPOSING PLAY
-					(event.get("to").equals("") || 
-						event.get("to").equals("OPPOSING PLAY") ||
-						event.get("to").equals("OPPOSING PLAY (Weapon)"))) {
-				opposingPlay(event);
+					(event.get("to").equals("OPPOSING PLAY") ||
+					event.get("to").equals("OPPOSING PLAY (Weapon)"))) {
+				moveOpposingHandOpposingPlay(event);
 			}
 		}
 	}
 	
-	protected void friendlyPlay(Map<String, String> event) {
-		theTool.logEvent(event); //debug
-		HearthstoneCard card = friendlyDeck.removeCard(event.get("id")); //remove card from friendly deck
-		if(card==null) { //TODO this quickfix assumes card was played from hand, should take card from correct zone
-			card = new HearthstoneCard(); //create a new card
-			card.getAttributes().put("id", event.get("id")); //set card id
-		}
-		card.cardAttributes.put("name", event.get("name"));
-		friendlyPlay.addCard(card);	//place card in friendly play
-		
-		//TODO notify tool
+	protected void moveFriendlyHandFriendlyDeck(Map<String, String> event) {
+		HearthstoneCard card = friendlyHand.removeCard(event.get("id")); //remove card from deck
+		updateCard(event,card); //update card with event data
+		friendlyDeck.addCard(card);	//place card in opposing play
+		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
-	protected void opposingPlay(Map<String, String> event) {
-		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from opposing deck
-		if(card==null) { //TODO this quickfix assumes card was played from hand, should take card from correct zone
-			card = new HearthstoneCard(); //create a new card
-			card.getAttributes().put("id", event.get("id")); //set card id
+	protected void moveOpposingHandOpposingDeck(Map<String, String> event) {
+		HearthstoneCard card = opposingHand.removeCard(event.get("id")); //remove card from deck
+		updateCard(event,card); //update card with event data
+		opposingDeck.addCard(card);	//place card in opposing play
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	protected void moveFriendlyDeckFriendlyHand(Map<String, String> event) {
+		HearthstoneCard card = friendlyDeck.removeCard(event.get("id")); //remove card from deck
+		updateCard(event,card); //update card with event data
+		friendlyHand.addCard(card);	//place card in opposing play
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	protected void moveOpposingDeckOpposingHand(Map<String, String> event) {
+		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from  deck
+		updateCard(event,card); //update card with event data
+		opposingHand.addCard(card);	//place card in opposing play
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	protected void moveUnknowToFriendlyHand(Map<String, String> event) {
+		HearthstoneCard card = new HearthstoneCard(); //create a new card
+		updateCard(event,card); //update card with event data
+		friendlyHand.addCard(card); //add card to deck
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	protected void moveUnknowToOpposingHand(Map<String, String> event) {
+		HearthstoneCard card = new HearthstoneCard(); //create a new card
+		updateCard(event,card); //update card with event data
+		opposingHand.addCard(card); //add card to deck
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	protected void moveFriendlyHandFriendlyPlay(Map<String, String> event) {
+		HearthstoneCard card = friendlyDeck.removeCard(event.get("id")); //remove card from friendly deck
+		if(card==null) {	//TODO exception thrown if card is not found
+			theTool.writeConsole("null friendly=");
+			//theTool.logEvent(event);
 		}
-		card.cardAttributes.put("name", event.get("name"));
+		updateCard(event,card); //update card with event data
+		friendlyPlay.addCard(card);	//place card in friendly play
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	protected void moveOpposingHandOpposingPlay(Map<String, String> event) {
+		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from opposing deck
+		if(card==null) { //TODO exception thrown if card is not found
+			theTool.writeConsole("null friendly \n");
+			//theTool.logEvent(event);
+		}
+		updateCard(event,card); //update card with event data
 		opposingPlay.addCard(card);	//place card in opposing play
-		
-		//TODO notify tool
+		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
 	protected void dealOpposingDeck(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(); //create a new card
-		card.getAttributes().put("id", event.get("id")); //set card id
-		card.cardAttributes.put("name", "unknown"); //cards from DECK are unknown
+		updateCard(event,card); //update card with event data
 		opposingDeck.addCard(card); //add card to deck
+		event.put("eventHandled", "true"); //flag event as handled
 	}
 
 	protected void dealFriendlyDeck(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(); //create a new card
-		card.getAttributes().put("id", event.get("id")); //set card id
-		card.cardAttributes.put("name", "unknown"); //cards from DECK are unknown
+		updateCard(event,card); //update card with event data
 		friendlyDeck.addCard(card); //add card to deck
+		event.put("eventHandled", "true"); //flag event as handled
 	}
 
 	protected void doGameStart(Map<String, String> event) {
 		reset();
 		theTool.notifyGameState(gameState = EVENT_HERO_FRIENDLY_PLAY); //notify Tool game started
+		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
 	protected void doGameOver(Map<String, String> event) {
 		theTool.notifyGameState(gameState = EVENT_HERO_GRAVEYARD); //notify Tool game over
+		event.put("eventHandled", "true"); //flag event as handled
 	}
-
+	
+	protected HearthstoneCard findCard(String id) {
+		HearthstoneCard card = null; //null until found
+		
+		for(HearthstoneCardZone z:zones) {	//for each zone
+			HearthstoneCard c = z.removeCard(id); // check if zone has card
+			if(c!=null) {	//check if card is found
+				break; //leave for
+			}
+		}
+		
+		return card; //card is null if not found
+	}
+	
+	protected void updateCard(Map<String,String> event, HearthstoneCard card ) {
+		if(event.containsKey("id")) {
+			//TODO cleanup
+		}
+		card.getAttributes().put("id", event.get("id"));
+		if(event.containsKey("name")) {
+			card.getAttributes().put("name", event.get("name"));
+		}else{
+			card.getAttributes().put("name", "unknown");
+		}
+	}
+	
 	protected boolean isHero(String s) {
 		  boolean isHero = false;
 		  if(s.equals("Garrosh Hellscream")) {

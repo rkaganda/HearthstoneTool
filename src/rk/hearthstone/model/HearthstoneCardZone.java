@@ -1,6 +1,7 @@
 package rk.hearthstone.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,10 @@ public class HearthstoneCardZone {
 	
 	public void addListener(HearthstoneCardZoneListener l) {
 		listeners.add(l);
+	}
+	
+	public Collection<HearthstoneCard> getCards() {
+		return cards.values();
 	}
 	
 	public boolean addCard(HearthstoneCard card) {
