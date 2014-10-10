@@ -109,24 +109,16 @@ public class HearthstoneGame {
 			if( event.get("name").equals("") &&
 				event.get("from").equals("") &&
 				event.get("to").equals("FRIENDLY DECK")) {
-				if(gameState==EVENT_HERO_FRIENDLY_PLAY) { 
 					theTool.notifyGameState(gameState = DEALING_FRIENDLY_DECK); //start DEALING_FRIENDLY_DECK state
 					dealFriendlyDeck(event);
-				}else if(gameState==DEALING_FRIENDLY_DECK) {
-					dealFriendlyDeck(event);
-				}
 			}
 			
 			// move "" : "" -> "OPPOSING DECK"
 			if( event.get("name").equals("") &&
 				event.get("from").equals("") &&
 				event.get("to").equals("OPPOSING DECK")) {
-				if(gameState==DEALING_FRIENDLY_DECK) { 
 					theTool.notifyGameState(gameState = DEALING_OPPOSING_DECK); //start DEALING_OPPOSING_DECK state
 					dealOpposingDeck(event);
-				}else if(gameState==DEALING_OPPOSING_DECK) {
-					dealOpposingDeck(event);
-				}	
 			}
 			
 			
@@ -194,19 +186,29 @@ public class HearthstoneGame {
 	}
 
 	protected boolean isHero(String s) {
-		boolean isHero = false;
-		if(s.equals("Garrosh Hellscream")) {
-			isHero = true;
-		}else if(s.equals("Rexxar")) {
-			isHero = true;
-		}else if(s.equals("Jaina Proudmoore")) {
-			isHero = true;
-		}else if(s.equals("Valeera Sanguinar")) {
-			isHero = true;
-		}
-		return isHero;
-	}
-
+		  boolean isHero = false;
+		  if(s.equals("Garrosh Hellscream")) {
+			  isHero = true;
+		  }else if(s.equals("Rexxar")) {
+			  isHero = true;
+		  }else if(s.equals("Jaina Proudmoore")) {
+		   isHero = true;
+		  }else if(s.equals("Valeera Sanguinar")) {
+		   isHero = true;
+		  }else if(s.equals("Thrall")) {
+		   isHero = true;
+		  }else if(s.equals("Malfurion Stormrage")) {
+		   isHero = true;
+		  }else if(s.equals("Uther the Lightbringer")) {
+		   isHero = true;
+		  }else if(s.equals("Anduin Wrynn")) {
+		   isHero = true;
+		  }else if(s.equals("Gul'dan")) {
+		   isHero = true;
+		  }
+		  return isHero;
+		 }
+	
 	public void reset() {
 		opposingDeck.clearZone();	//empty zones
 		friendlyDeck.clearZone();
