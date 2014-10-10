@@ -177,6 +177,7 @@ public class HearthstoneGame {
 		}
 	}
 	
+	//Hand -> Deck
 	protected void moveFriendlyHandFriendlyDeck(Map<String, String> event) {
 		HearthstoneCard card = friendlyHand.removeCard(event.get("id")); //remove card from deck
 		updateCard(event,card); //update card with event data
@@ -191,6 +192,7 @@ public class HearthstoneGame {
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
+	//Deck -> Hand
 	protected void moveFriendlyDeckFriendlyHand(Map<String, String> event) {
 		HearthstoneCard card = friendlyDeck.removeCard(event.get("id")); //remove card from deck
 		updateCard(event,card); //update card with event data
@@ -205,6 +207,7 @@ public class HearthstoneGame {
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
+	//Unknown -> Hand
 	protected void moveUnknowToFriendlyHand(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(); //create a new card
 		updateCard(event,card); //update card with event data
@@ -219,11 +222,13 @@ public class HearthstoneGame {
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
+	//Hand -> Play
 	protected void moveFriendlyHandFriendlyPlay(Map<String, String> event) {
-		HearthstoneCard card = friendlyDeck.removeCard(event.get("id")); //remove card from friendly deck
+		HearthstoneCard card = friendlyHand.removeCard(event.get("id")); //remove card from friendly deck
 		if(card==null) {	//TODO exception thrown if card is not found
-			theTool.writeConsole("null friendly=");
-			//theTool.logEvent(event);
+			theTool.writeConsole("null friendly=\n"+event.get("id"));
+			findCard(event.get("id"));
+			theTool.stopWatching(); //KILL
 		}
 		updateCard(event,card); //update card with event data
 		friendlyPlay.addCard(card);	//place card in friendly play
@@ -231,16 +236,19 @@ public class HearthstoneGame {
 	}
 	
 	protected void moveOpposingHandOpposingPlay(Map<String, String> event) {
-		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from opposing deck
+		HearthstoneCard card = opposingHand.removeCard(event.get("id")); //remove card from opposing deck
 		if(card==null) { //TODO exception thrown if card is not found
-			theTool.writeConsole("null friendly \n");
-			//theTool.logEvent(event);
+			theTool.writeConsole("null friendly=\n"+event.get("id"));
+			findCard(event.get("id"));
+			theTool.stopWatching(); //KILL
 		}
 		updateCard(event,card); //update card with event data
 		opposingPlay.addCard(card);	//place card in opposing play
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
+	// unknown -> Deck  
+	//TODO rename methods for clarity
 	protected void dealOpposingDeck(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(); //create a new card
 		updateCard(event,card); //update card with event data
@@ -255,6 +263,7 @@ public class HearthstoneGame {
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
+	//Hero -> Play
 	protected void moveHeroUnknownFriendlyPlay(Map<String, String> event) {
 		if(gameFlags.get("gameRunning").equals("false")) { //make sure game isn't already running
 			doGameStart(event);
@@ -268,6 +277,7 @@ public class HearthstoneGame {
 		}
 		event.put("eventHandled", "true"); //flag event as handled
 	}
+	
 	
 	protected void doGameStart(Map<String, String> event) {
 		reset();	
@@ -289,6 +299,7 @@ public class HearthstoneGame {
 		for(HearthstoneCardZone z:zones) {	//for each zone
 			HearthstoneCard c = z.removeCard(id); // check if zone has card
 			if(c!=null) {	//check if card is found
+				theTool.writeConsole("found card in zone="+z.getName());
 				break; //leave for
 			}
 		}
@@ -299,6 +310,7 @@ public class HearthstoneGame {
 	protected void updateCard(Map<String,String> event, HearthstoneCard card ) {
 		if(event.containsKey("id")) {
 			//TODO cleanup
+			System.out.println("created card="+event.get("id"));
 		}
 		card.getAttributes().put("id", event.get("id"));
 		if(event.containsKey("name")) {
