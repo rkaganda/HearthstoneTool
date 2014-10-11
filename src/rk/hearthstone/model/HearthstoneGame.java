@@ -417,7 +417,7 @@ public class HearthstoneGame {
 	protected void moveUnknowToFriendlyPlay(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(event); //create a new card
 		updateCard(event,card); //update card with event data
-		friendlyHand.addCard(card); //add card to deck
+		friendlyPlay.addCard(card); //add card to deck
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
