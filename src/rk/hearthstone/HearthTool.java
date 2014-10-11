@@ -45,7 +45,14 @@ public class HearthTool {
 			if(s.substring(0,6).equals("[Zone]")) { //if [Zone] log
 				Map<String,String> event = HearthstoneGame.parseEvent(s); //attempt to parse event
 				if(event.containsKey(("type"))) { //if event was parsed
-					theGame.handleEvent(event); //pass event to game to handle
+					try{
+						theGame.handleEvent(event); //pass event to game to handle
+					}catch(Exception e) {
+						writeConsole("Event handling threw Exception: "+e.getMessage()+"\n");
+						writeConsole("Event: ");
+						this.logEvent(event);
+						stopWatching();
+					}
 					if(!event.containsKey("eventHandled")) { //check if event was handled
 						logEvent(event); //debug
 					}

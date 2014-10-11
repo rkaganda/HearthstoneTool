@@ -29,7 +29,7 @@ public class HearthstoneCardZone {
 		boolean addOK = false;
 		
 		if(!cards.containsKey(card.cardAttributes.get("id"))) { //check if zone already contains card with same id
-			cards.put(card.getAttributes().get("id"), card);
+			cards.put(card.get("id"), card);
 			
 			for(HearthstoneCardZoneListener l:listeners) {
 				l.cardAdded(card);	//notify listener
