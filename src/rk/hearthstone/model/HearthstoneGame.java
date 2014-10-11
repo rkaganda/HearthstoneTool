@@ -8,12 +8,9 @@ import java.util.Map;
 import rk.hearthstone.HearthTool;
 
 public class HearthstoneGame {
-	//TODO remove unneeded states
 	public final static int DISABLE = 0;
 	public final static int WAITING_HERO = 1; //game has ended waiting for a hero to enter play
 	public final static int HERO_PLAY = 2; //hero as entered play
-	public final static int DEALING_FRIENDLY_DECK = 3; //game state while FRIENDLY DECK is dealt
-	public final static int DEALING_OPPOSING_DECK = 5; 
 	public final static int HERO_GRAVEYARD = 100; // hero is in graveyard
 	
 	protected Map<String,String> gameFlags; //stores game state flags
@@ -155,29 +152,29 @@ public class HearthstoneGame {
 			// move * from unknown to DECK
 			if( event.get("from").equals("unknown") &&
 				event.get("to").equals("FRIENDLY DECK")) {
-					dealFriendlyDeck(event);
+					moveUnknownFriendlyDeck(event);
 			}
 			if( event.get("from").equals("unknown") &&
 				event.get("to").equals("OPPOSING DECK")) {
-					dealOpposingDeck(event);
+					moveUnknownOpposingDeck(event);
 			}
 			
 			// move * from unknown -> HAND
 			if( event.get("from").equals("unknown") && 	// if card unknown -> FRIENDLY HAND
 					event.get("to").equals("FRIENDLY HAND")) {
-				moveUnknowToFriendlyHand(event);
+				moveUnknowFriendlyHand(event);
 			}else if( event.get("from").equals("unknown") && 	// if card unknown -> OPPOSING HAND
 					event.get("to").equals("OPPOSING HAND")) {
-				moveUnknowToOpposingHand(event);
+				moveUnknowOpposingHand(event);
 			}
 			
 			//move * from unknown -> PLAY
 			if( event.get("from").equals("unknown") && 	
 					event.get("to").equals("FRIENDLY PLAY")) {
-				moveUnknowToFriendlyPlay(event);
+				moveUnknowFriendlyPlay(event);
 			}else if( event.get("from").equals("unknown") && 	
 					event.get("to").equals("OPPOSING PLAY")) {
-				moveUnknowToOpposingPlay(event);
+				moveUnknowOpposingPlay(event);
 			}
 			
 			//move * from unknown -> SECRET
@@ -544,15 +541,30 @@ public class HearthstoneGame {
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
+	// Unknown -> Deck  
+	protected void moveUnknownOpposingDeck(Map<String, String> event) {
+		HearthstoneCard card = new HearthstoneCard(event); //create a new card
+		updateCard(event,card); //update card with event data
+		opposingDeck.addCard(card); //add card to deck
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+
+	protected void moveUnknownFriendlyDeck(Map<String, String> event) {
+		HearthstoneCard card = new HearthstoneCard(event); //create a new card
+		updateCard(event,card); //update card with event data
+		friendlyDeck.addCard(card); //add card to deck
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
 	//Unknown -> Hand
-	protected void moveUnknowToFriendlyHand(Map<String, String> event) {
+	protected void moveUnknowFriendlyHand(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(event); //create a new card
 		updateCard(event,card); //update card with event data
 		friendlyHand.addCard(card); //add card to deck
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
-	protected void moveUnknowToOpposingHand(Map<String, String> event) {
+	protected void moveUnknowOpposingHand(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(event); //create a new card
 		updateCard(event,card); //update card with event data
 		opposingHand.addCard(card); //add card to deck
@@ -560,14 +572,14 @@ public class HearthstoneGame {
 	}
 	
 	//Unknown -> Played
-	protected void moveUnknowToFriendlyPlay(Map<String, String> event) {
+	protected void moveUnknowFriendlyPlay(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(event); //create a new card
 		updateCard(event,card); //update card with event data
 		friendlyPlay.addCard(card); //add card to deck
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
-	protected void moveUnknowToOpposingPlay(Map<String, String> event) {
+	protected void moveUnknowOpposingPlay(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(event); //create a new card
 		updateCard(event,card); //update card with event data
 		opposingPlay.addCard(card); //add card to deck
@@ -601,22 +613,6 @@ public class HearthstoneGame {
 		HearthstoneCard card = new HearthstoneCard(event); //create a new card
 		updateCard(event,card); //update card with event data
 		opposingGraveyard.addCard(card);	//place card in zone
-		event.put("eventHandled", "true"); //flag event as handled
-	}
-
-	// Unknown -> Deck  
-	//TODO rename methods for clarity
-	protected void dealOpposingDeck(Map<String, String> event) {
-		HearthstoneCard card = new HearthstoneCard(event); //create a new card
-		updateCard(event,card); //update card with event data
-		opposingDeck.addCard(card); //add card to deck
-		event.put("eventHandled", "true"); //flag event as handled
-	}
-
-	protected void dealFriendlyDeck(Map<String, String> event) {
-		HearthstoneCard card = new HearthstoneCard(event); //create a new card
-		updateCard(event,card); //update card with event data
-		friendlyDeck.addCard(card); //add card to deck
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	

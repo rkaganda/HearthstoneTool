@@ -14,7 +14,7 @@ import rk.hearthstone.ui.HearthFrame;
 
 public class HearthTool {
 	protected HearthFrame theFrame;
-	protected boolean watchingFile, recordingDecks;
+	protected boolean watchingFile, recordingGames;
 	protected File watchedFile;
 	protected ArrayList<String> lastLog;
 	protected HearthstoneGame theGame;
@@ -28,7 +28,7 @@ public class HearthTool {
 	public HearthTool() {
 		theFrame = new HearthFrame(this);
 		watchingFile = false;
-		recordingDecks = false;
+		recordingGames = false;
 		theGame = new HearthstoneGame(this);
 	}
 	
@@ -56,6 +56,8 @@ public class HearthTool {
 					}
 					if(!event.containsKey("eventHandled")) { //check if event was handled
 						logEvent(event); //debug
+					}else if(recordingGames) {
+						//TODO save event
 					}
 				}
 			}
@@ -94,13 +96,9 @@ public class HearthTool {
 	}
 
 	public void stopWatching() {
-		if(recordingDecks) { 	//if recording
-			if(theGame.getState() > HearthstoneGame.WAITING_HERO) { //if game is active
-				
-			}else { // recording but game is not active
-				theFrame.recordingStop();
-			}
-			recordingDecks = false; //recording stopped
+		if(recordingGames) { 	//if recording
+			theFrame.recordingStop();
+			recordingGames = false; //recording stopped
 		}
 		
 		myWatcher.stayAlive(false); //tell Runnable to die
@@ -115,13 +113,13 @@ public class HearthTool {
 
 	public void doRecord() {
 		if(watchingFile){ //sanity check
-			if(!recordingDecks ) { //not recording
+			if(!recordingGames ) { //not recording
 				theGame.reset(); //reset the game, push new zones to view				
-				recordingDecks = true;
+				recordingGames = true;
 				theFrame.recordWaiting(); //update toolbar 
-			}else if(recordingDecks) {
+			}else if(recordingGames) {
 				theFrame.recordingStop(); //stop recording
-				recordingDecks = false;
+				recordingGames = false;
 			}
 		}
 	}
@@ -139,7 +137,6 @@ public class HearthTool {
 	}
 	
 	public void notifyGameState(int i) {
-		//TODO remove unneeded game states, only notify of game start and game end
 		if(i == HearthstoneGame.WAITING_HERO) {
 			theFrame.recordWaiting(); 	//update toolbar
 			theFrame.writeConsoleLine("Game State: WAITING_HERO");
@@ -147,12 +144,6 @@ public class HearthTool {
 			theFrame.gameStarted(); //update UI
 			theFrame.updateZones(theGame.getZones()); //update zone views
 			theFrame.writeConsoleLine("Game State: HERO_PLAY");
-		}else if(i==HearthstoneGame.DEALING_FRIENDLY_DECK) {
-			theFrame.gameStarted(); //update UI 
-			theFrame.writeConsoleLine("Game State: DEALING_FRIENDLY_DECK");
-		}else if(i==HearthstoneGame.DEALING_OPPOSING_DECK) {
-			theFrame.gameStarted(); //update UI 
-			theFrame.writeConsoleLine("Game State: DEALING_OPPOSING_DECK");
 		}else if(i==HearthstoneGame.HERO_GRAVEYARD) {
 			theFrame.recordWaiting(); 	//update toolbar
 			theFrame.writeConsoleLine("Game State: HERO_GRAVEYARD");
