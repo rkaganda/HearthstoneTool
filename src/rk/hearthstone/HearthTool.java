@@ -52,6 +52,7 @@ public class HearthTool {
 						writeConsole("Event: ");
 						this.logEvent(event);
 						stopWatching();
+						e.printStackTrace();
 					}
 					if(!event.containsKey("eventHandled")) { //check if event was handled
 						logEvent(event); //debug
