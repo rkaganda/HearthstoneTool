@@ -498,8 +498,8 @@ public class HearthstoneGame {
 	}
 	
 	protected void doGameOver(Map<String, String> event) {
-		//TODO gameFlags gameRunning = false
 		//TODO MERGE notifyGameState with gameFlags
+		gameFlags.put("gameRunning","false");
 		theTool.notifyGameState(gameState = HERO_GRAVEYARD); //notify Tool game over
 		event.put("eventHandled", "true"); //flag event as handled
 	}
