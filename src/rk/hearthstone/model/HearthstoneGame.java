@@ -208,6 +208,15 @@ public class HearthstoneGame {
 				moveOpposingDeckOpposingHand(event);
 			}
 			
+			// move * DECK -> PLAY events
+			if( event.get("from").equals("FRIENDLY DECK") && 	
+					event.get("to").equals("FRIENDLY PLAY")) {
+				moveFriendlyDeckFriendlyPlay(event);
+			}else if( event.get("from").equals("OPPOSING DECK") && 	
+					event.get("to").equals("OPPOSING PLAY")) {
+				moveOpposingDeckOpposingPlay(event);
+			}
+			
 			//move * DECK -> GRAVEYARD events
 			if( event.get("from").equals("FRIENDLY DECK") && 	
 					event.get("to").equals("FRIENDLY GRAVEYARD")) {
@@ -312,6 +321,21 @@ public class HearthstoneGame {
 		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from zone
 		updateCard(event,card); //update card with event data
 		opposingHand.addCard(card);	//place card in zone
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	// Deck -> Play
+	protected void moveFriendlyDeckFriendlyPlay(Map<String, String> event) {
+		HearthstoneCard card = friendlyDeck.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data
+		friendlyPlay.addCard(card);	//place card in zone
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+		
+	protected void moveOpposingDeckOpposingPlay(Map<String, String> event) {
+		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data
+		opposingPlay.addCard(card);	//place card in zone
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
