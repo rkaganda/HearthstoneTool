@@ -180,7 +180,7 @@ public class HearthstoneGame {
 				moveUnknowToOpposingPlay(event);
 			}
 			
-			//move * from unknown -> PLAY
+			//move * from unknown -> SECRET
 			if( event.get("from").equals("unknown") && 	
 					event.get("to").equals("FRIENDLY SECRET")) {
 				moveUnknowToFriendlySecret(event);
@@ -206,6 +206,15 @@ public class HearthstoneGame {
 			}else if( event.get("from").equals("OPPOSING DECK") && 	
 					event.get("to").equals("OPPOSING HAND")) {
 				moveOpposingDeckOpposingHand(event);
+			}
+			
+			// move * DECK -> SECRET
+			if( event.get("from").equals("FRIENDLY DECK") && 	
+					event.get("to").equals("FRIENDLY SECRET")) {
+				moveFriendlyDeckFriendlySecret(event);
+			}else if( event.get("from").equals("OPPOSING DECK") && 	
+					event.get("to").equals("OPPOSING SECRET")) {
+				moveOpposingDeckOpposingSecret(event);
 			}
 			
 			// move * DECK -> PLAY events
@@ -287,10 +296,20 @@ public class HearthstoneGame {
 				moveOpposingPlayFriendlyPlay(event);
 			}
 			
+			// move * from PLAY to unknown
+			if( event.get("from").equals("FRIENDLY PLAY") &&
+					event.get("to").equals("unknown")) {
+				moveFriendlyPlayUnknown(event);
+			}
+			if( event.get("from").equals("OPPOSING PLAY") &&
+					event.get("to").equals("unknown")) {
+				moveOpposingPlayUnknown(event);
+			}
+			
 			// move * from PLAY to GRAVEYARD
 			if( event.get("from").equals("FRIENDLY PLAY") &&
 					event.get("to").equals("FRIENDLY GRAVEYARD")) {
-				moveFriendlyPlayFrindlyGraveyard(event);
+				moveFriendlyPlayFriendlyGraveyard(event);
 			}
 			if( event.get("from").equals("OPPOSING PLAY") &&
 					event.get("to").equals("OPPOSING GRAVEYARD")) {
@@ -321,6 +340,21 @@ public class HearthstoneGame {
 		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from zone
 		updateCard(event,card); //update card with event data
 		opposingHand.addCard(card);	//place card in zone
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	//Deck -> Hand
+	protected void moveFriendlyDeckFriendlySecret(Map<String, String> event) {
+		HearthstoneCard card = friendlyDeck.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data
+		friendlySecret.addCard(card);	//place card in zone
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+		
+	protected void moveOpposingDeckOpposingSecret(Map<String, String> event) {
+		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data
+		opposingSecret.addCard(card);	//place card in zone
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
@@ -442,8 +476,21 @@ public class HearthstoneGame {
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
+	//Play -> Unknown
+	protected void moveFriendlyPlayUnknown(Map<String, String> event) {
+		HearthstoneCard card = friendlyPlay.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data	
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+		
+	protected void moveOpposingPlayUnknown(Map<String, String> event) {
+		HearthstoneCard card = opposingPlay.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
 	//Play -> Graveyard
-	protected void moveFriendlyPlayFrindlyGraveyard(Map<String, String> event) {
+	protected void moveFriendlyPlayFriendlyGraveyard(Map<String, String> event) {
 		HearthstoneCard card = friendlyPlay.removeCard(event.get("id")); //remove card from zone
 		updateCard(event,card); //update card with event data	
 		friendlyGraveyard.addCard(card);	//place card in zone
