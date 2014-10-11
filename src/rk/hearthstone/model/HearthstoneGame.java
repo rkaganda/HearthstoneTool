@@ -634,13 +634,11 @@ public class HearthstoneGame {
 	
 	protected void doGameStart(Map<String, String> event) {
 		reset();	
-		//TODO MERGE notifyGameState with gameFlags
 		gameFlags.put("gameRunning","true");
 		theTool.notifyGameState(gameState = HERO_PLAY); //notify Tool game started 
 	}
 	
 	protected void doGameOver(Map<String, String> event) {
-		//TODO MERGE notifyGameState with gameFlags
 		gameFlags.put("gameRunning","false");
 		theTool.notifyGameState(gameState = HERO_GRAVEYARD); //notify Tool game over
 		event.put("eventHandled", "true"); //flag event as handled
@@ -702,7 +700,7 @@ public class HearthstoneGame {
 		opposingGraveyard.clearZone();
 		friendlyGraveyard.clearZone();
 		
-		
+		theTool.notifyGameState(gameState = WAITING_HERO);
 	}
 
 	public List<HearthstoneCardZone> getZones() {

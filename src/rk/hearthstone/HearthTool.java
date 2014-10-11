@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import rk.hearthstone.io.EventFileWriter;
 import rk.hearthstone.io.LogFileWatcher;
 import rk.hearthstone.io.LogParserWorker;
 import rk.hearthstone.model.HearthstoneCard;
@@ -20,6 +21,7 @@ public class HearthTool {
 	protected HearthstoneGame theGame;
 	protected LogFileWatcher myWatcher;
 	protected Thread watcherThread;
+	protected ArrayList<Map<String,String>> gameEvents;
 	
 	public static void main(String args[]) {
 		HearthTool myTool = new HearthTool();
@@ -30,6 +32,7 @@ public class HearthTool {
 		watchingFile = false;
 		recordingGames = false;
 		theGame = new HearthstoneGame(this);
+		gameEvents = new ArrayList<Map<String,String>>();
 	}
 	
 	public void parseLog(File file) {
@@ -56,11 +59,18 @@ public class HearthTool {
 					}
 					if(!event.containsKey("eventHandled")) { //check if event was handled
 						logEvent(event); //debug
-					}else if(recordingGames) {
-						//TODO save event
+					}
+					if(recordingGames) {
+						gameEvents.add(event);
 					}
 				}
 			}
+		}
+	}
+	
+	protected void saveEventFile() {
+		if(gameEvents.size()>0) {
+			writeConsole("Event file saved to: "+EventFileWriter.writeEventFile(gameEvents, "eventlist_"+ System.currentTimeMillis()));
 		}
 	}
 	
@@ -114,12 +124,13 @@ public class HearthTool {
 	public void doRecord() {
 		if(watchingFile){ //sanity check
 			if(!recordingGames ) { //not recording
-				theGame.reset(); //reset the game, push new zones to view				
+				theGame.reset(); //reset the game, push new zones to view
+				gameEvents.clear(); //clear event list
 				recordingGames = true;
-				theFrame.recordWaiting(); //update toolbar 
 			}else if(recordingGames) {
 				theFrame.recordingStop(); //stop recording
 				recordingGames = false;
+				saveEventFile();
 			}
 		}
 	}
@@ -147,6 +158,9 @@ public class HearthTool {
 		}else if(i==HearthstoneGame.HERO_GRAVEYARD) {
 			theFrame.recordWaiting(); 	//update toolbar
 			theFrame.writeConsoleLine("Game State: HERO_GRAVEYARD");
+			if(recordingGames) {
+				saveEventFile();
+			}
 		}
 	}
 }
