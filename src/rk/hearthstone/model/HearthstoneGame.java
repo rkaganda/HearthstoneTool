@@ -282,7 +282,7 @@ public class HearthstoneGame {
 				moveFriendlyPlayFriendlyHand(event);
 			}
 			if( event.get("from").equals("OPPOSING PLAY") &&
-					event.get("to").equals("FRIENDLY HAND")) {
+					event.get("to").equals("OPPOSING HAND")) {
 				moveOpposingPlayOpposingHand(event);
 			}
 			
