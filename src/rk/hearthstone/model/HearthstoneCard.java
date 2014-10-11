@@ -11,12 +11,14 @@ public class HearthstoneCard {
 		cardAttributes = new HashMap<String,String>();
 		cardAttributes.put("id", event.get("id"));
 		
-		if(event.get("from").equals("unknown") &&
-				( event.get("to").equals("FRIENDLY PLAY") ||
-				event.get("to").equals("OPPOSING PLAY")) ) {
-			cardAttributes.put("summon", "true");
-		}else {
-			cardAttributes.put("summon", "false");
+		if(event.get("type").equals("move")) { //if event type=move
+			if(event.get("from").equals("unknown") && //if card from unknown to PLAY
+					( event.get("to").equals("FRIENDLY PLAY") || 
+					event.get("to").equals("OPPOSING PLAY")) ) {
+				cardAttributes.put("summon", "true"); //card is summon
+			}else {
+				cardAttributes.put("summon", "false"); //card is not summon
+			}
 		}
 	}
 	

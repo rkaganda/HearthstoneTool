@@ -180,6 +180,15 @@ public class HearthstoneGame {
 				moveUnknowToOpposingPlay(event);
 			}
 			
+			//move * from unknown -> PLAY
+			if( event.get("from").equals("unknown") && 	
+					event.get("to").equals("FRIENDLY SECRET")) {
+				moveUnknowToFriendlySecret(event);
+			}else if( event.get("from").equals("unknown") && 	
+					event.get("to").equals("OPPOSING SECRET")) {
+				moveUnknowToOpposingSecret(event);
+			}
+			
 			// move * from unknown to GRAVEYARD
 			if( event.get("from").equals("unknown") &&
 					event.get("to").equals("FRIENDLY GRAVEYARD")) {
@@ -191,12 +200,21 @@ public class HearthstoneGame {
 			}
 			
 			// move * DECK -> HAND events
-			if( event.get("from").equals("FRIENDLY DECK") && 	// if card FRIENDLY DECK -> FRIENDLY HAND
+			if( event.get("from").equals("FRIENDLY DECK") && 	
 					event.get("to").equals("FRIENDLY HAND")) {
 				moveFriendlyDeckFriendlyHand(event);
-			}else if( event.get("from").equals("OPPOSING DECK") && 	// if card OPPOSING DECK -> OPPOSING HAND
+			}else if( event.get("from").equals("OPPOSING DECK") && 	
 					event.get("to").equals("OPPOSING HAND")) {
 				moveOpposingDeckOpposingHand(event);
+			}
+			
+			//move * DECK -> GRAVEYARD events
+			if( event.get("from").equals("FRIENDLY DECK") && 	
+					event.get("to").equals("FRIENDLY GRAVEYARD")) {
+				moveFriendlyDeckFriendlyGraveyard(event);
+			}else if( event.get("from").equals("OPPOSING DECK") && 
+					event.get("to").equals("OPPOSING GRAVEYARD")) {
+				moveOpposingDeckOpposingGraveyard(event);
 			}
 			
 			// move * from HAND to DECK
@@ -240,7 +258,6 @@ public class HearthstoneGame {
 				moveOpposingHandUnknown(event);
 			}
 			
-			
 			// move * from PLAY to GRAVEYARD
 			if( event.get("from").equals("FRIENDLY PLAY") &&
 					event.get("to").equals("FRIENDLY GRAVEYARD")) {
@@ -249,6 +266,16 @@ public class HearthstoneGame {
 			if( event.get("from").equals("OPPOSING PLAY") &&
 					event.get("to").equals("OPPOSING GRAVEYARD")) {
 				moveOpposingPlayOpposingGraveyard(event);
+			}
+			
+			//move * from SECRET to GRAVEYARD
+			if( event.get("from").equals("FRIENDLY SECRET") &&
+					event.get("to").equals("FRIENDLY GRAVEYARD")) {
+				moveFriendlyPlayFrindlySecret(event);
+			}
+			if( event.get("from").equals("OPPOSING SECRET") &&
+					event.get("to").equals("OPPOSING GRAVEYARD")) {
+				moveOpposingPlayOpposingSecret(event);
 			}
 		}
 	}
@@ -267,17 +294,17 @@ public class HearthstoneGame {
 		opposingHand.addCard(card);	//place card in zone
 		event.put("eventHandled", "true"); //flag event as handled
 	}
-		
-	//Play -> Graveyard
-	protected void moveFriendlyPlayFrindlyGraveyard(Map<String, String> event) {
-		HearthstoneCard card = friendlyPlay.removeCard(event.get("id")); //remove card from zone
+	
+	//Deck -> Graveyard
+	protected void moveFriendlyDeckFriendlyGraveyard(Map<String, String> event) {
+		HearthstoneCard card = friendlyDeck.removeCard(event.get("id")); //remove card from zone
 		updateCard(event,card); //update card with event data
 		friendlyGraveyard.addCard(card);	//place card in zone
 		event.put("eventHandled", "true"); //flag event as handled
 	}
-	
-	protected void moveOpposingPlayOpposingGraveyard(Map<String, String> event) {
-		HearthstoneCard card = opposingPlay.removeCard(event.get("id")); //remove card from zone
+		
+	protected void moveOpposingDeckOpposingGraveyard(Map<String, String> event) {
+		HearthstoneCard card = opposingDeck.removeCard(event.get("id")); //remove card from zone
 		updateCard(event,card); //update card with event data
 		opposingGraveyard.addCard(card);	//place card in zone
 		event.put("eventHandled", "true"); //flag event as handled
@@ -341,6 +368,36 @@ public class HearthstoneGame {
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
+	//Play -> Graveyard
+	protected void moveFriendlyPlayFrindlyGraveyard(Map<String, String> event) {
+		HearthstoneCard card = friendlyPlay.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data	
+		friendlyGraveyard.addCard(card);	//place card in zone
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+		
+	protected void moveOpposingPlayOpposingGraveyard(Map<String, String> event) {
+		HearthstoneCard card = opposingPlay.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data
+		opposingGraveyard.addCard(card);	//place card in zone
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	//Secret -> Graveyard
+	protected void moveFriendlyPlayFrindlySecret(Map<String, String> event) {
+		HearthstoneCard card = friendlySecret.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data	
+		friendlyGraveyard.addCard(card);	//place card in zone
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+		
+	protected void moveOpposingPlayOpposingSecret(Map<String, String> event) {
+		HearthstoneCard card = opposingSecret.removeCard(event.get("id")); //remove card from zone
+		updateCard(event,card); //update card with event data
+		opposingGraveyard.addCard(card);	//place card in zone
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
 	//Unknown -> Hand
 	protected void moveUnknowToFriendlyHand(Map<String, String> event) {
 		HearthstoneCard card = new HearthstoneCard(event); //create a new card
@@ -368,6 +425,21 @@ public class HearthstoneGame {
 		HearthstoneCard card = new HearthstoneCard(event); //create a new card
 		updateCard(event,card); //update card with event data
 		opposingPlay.addCard(card); //add card to deck
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	// Unknown -> Secret
+	protected void moveUnknowToFriendlySecret(Map<String, String> event) {
+		HearthstoneCard card = new HearthstoneCard(event); //create a new card
+		updateCard(event,card); //update card with event data
+		friendlySecret.addCard(card); //add card to deck
+		event.put("eventHandled", "true"); //flag event as handled
+	}
+	
+	protected void moveUnknowToOpposingSecret(Map<String, String> event) {
+		HearthstoneCard card = new HearthstoneCard(event); //create a new card
+		updateCard(event,card); //update card with event data
+		opposingSecret.addCard(card); //add card to deck
 		event.put("eventHandled", "true"); //flag event as handled
 	}
 	
@@ -468,7 +540,7 @@ public class HearthstoneGame {
 		   isHero = true;
 		  }else if(s.equals("Malfurion Stormrage")) {
 		   isHero = true;
-		  }else if(s.equals("Uther the Lightbringer")) {
+		  }else if(s.equals("Uther Lightbringer")) {
 		   isHero = true;
 		  }else if(s.equals("Anduin Wrynn")) {
 		   isHero = true;
