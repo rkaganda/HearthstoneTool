@@ -125,6 +125,16 @@ public class HearthstoneGame {
 				event.put("eventHandled", "true"); //flag event as handled
 			}
 			
+			// move * from PLAY (Hero Power) to unknown
+			if( event.get("from").equals("unknown") &&
+				event.get("to").equals("FRIENDLY PLAY (Weapon)")) {
+					event.put("eventHandled", "true"); //flag event as handled
+			}
+			if( event.get("from").equals("unknown") &&
+				event.get("to").equals("OPPOSING PLAY (Weapon)")) {
+					event.put("eventHandled", "true"); //flag event as handled
+			}
+			
 			// move * from unknown to DECK
 			if( event.get("from").equals("unknown") &&
 				event.get("to").equals("FRIENDLY DECK")) {
