@@ -38,13 +38,9 @@ public class HearthFrame extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	protected HearthTool hearthTool;
-	
-	protected JMenuBar menubar;
-	protected JMenu fileMenu, watchMenu;
-	protected JMenuItem loadFileItem;
-	
+
 	protected JPanel cardViews;
-	protected JButton watchButton, recordButton;
+	protected JButton watchButton, recordButton, eventButton;
 	
 	
 	protected Map<String,CardZoneView> cardListViews;
@@ -70,15 +66,6 @@ public class HearthFrame extends JFrame implements ActionListener {
 		 } catch (Exception e) {
 		            e.printStackTrace();
 		 }
-		menubar = new JMenuBar(); 
-		fileMenu = new JMenu("File");
-		watchMenu = new JMenu("Watch");
-		loadFileItem = new JMenuItem("Open Log");
-		loadFileItem.addActionListener(this);
-		fileMenu.add(loadFileItem);
-		menubar.add(fileMenu);
-		menubar.add(watchMenu);
-		//setJMenuBar(menubar);
 
 		JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new BorderLayout());
@@ -86,7 +73,7 @@ public class HearthFrame extends JFrame implements ActionListener {
 		
 		
 		JToolBar toolBar = new JToolBar("main");
-		watchButton = new JButton("Start Watching");
+		watchButton = new JButton("Watch Log");
 		watchButton.addActionListener(this);
 		watchButton.setBackground(Color.GREEN);
 		toolBar.add(watchButton);
@@ -95,6 +82,10 @@ public class HearthFrame extends JFrame implements ActionListener {
 		recordButton.setEnabled(false);
 		recordButton.addActionListener(this);
 		toolBar.add(recordButton);
+		eventButton = new JButton("Load Events");
+		eventButton.addActionListener(this);
+		eventButton.setBackground(Color.GREEN);
+		toolBar.add(eventButton);
 		
 		cardViews = new JPanel();
 		cardViews.setLayout(new BoxLayout(cardViews, BoxLayout.X_AXIS));
@@ -150,7 +141,10 @@ public class HearthFrame extends JFrame implements ActionListener {
 				public void run() {
 					watchButton.setText("Stop Watching"); 
 					watchButton.setBackground(Color.RED);
+					recordButton.setBackground(Color.GREEN);
 					recordButton.setEnabled(true); //record enabled
+					eventButton.setBackground(Color.LIGHT_GRAY);
+					eventButton.setEnabled(false);
 				}
 			});
 		}else {
@@ -158,7 +152,10 @@ public class HearthFrame extends JFrame implements ActionListener {
 				public void run() {
 					watchButton.setText("Start Watching");
 					watchButton.setBackground(Color.GREEN);
+					recordButton.setBackground(Color.LIGHT_GRAY);
 					recordButton.setEnabled(false); //record disabled
+					eventButton.setBackground(Color.GREEN);
+					eventButton.setEnabled(true);
 				}
 			});
 		}
@@ -166,15 +163,7 @@ public class HearthFrame extends JFrame implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource().equals(loadFileItem)) {
-			final JFileChooser fc = new JFileChooser();
-			int returnVal = fc.showOpenDialog(this);
-
-	        if (returnVal == JFileChooser.APPROVE_OPTION) {
-	            File file = fc.getSelectedFile();
-	            hearthTool.parseLog(file);
-	        }
-		}else if(e.getSource().equals(watchButton)) { //watch button
+		if(e.getSource().equals(watchButton)) { //watch button
 			if(!isWatching) { 
 				startWatching(); 
 			}else {
@@ -186,6 +175,8 @@ public class HearthFrame extends JFrame implements ActionListener {
 			if(recordButton.isEnabled()) {  //sanity check
 				hearthTool.doRecord(); //notify tool record button 
 			}
+		}else if(e.getSource().equals(eventButton)) {
+			
 		}
 	}
 
@@ -196,6 +187,16 @@ public class HearthFrame extends JFrame implements ActionListener {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             hearthTool.watchFile(file); //send File to tool for watching
+        }
+	}
+	
+	protected void loadEvents() {
+		final JFileChooser fc = new JFileChooser(); //get the file 
+		int returnVal = fc.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            hearthTool.playEvents(file); //send File to tool for watching
         }
 	}
 	

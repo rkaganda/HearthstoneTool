@@ -192,4 +192,9 @@ public class HearthTool implements Runnable {
 			}
 		}
 	}
+
+	public void playEvents(File file) {
+		// TODO Auto-generated method stub
+		
+	}
 }
