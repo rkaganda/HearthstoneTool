@@ -52,7 +52,6 @@ public class HearthTool implements Runnable {
 				Map<String,String> event = HearthstoneGame.parseEvent(s); //attempt to parse event
 				if(event.containsKey(("type"))) { //if event was parsed
 					try {
-						System.out.println("event");
 						queuedEvents.put(event); //queue the event to be handled
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -171,7 +170,6 @@ public class HearthTool implements Runnable {
 
 	@Override
 	public void run() {
-		System.out.println("looping");
 		while(processEvents) {
 			Map<String,String> event = queuedEvents.poll();
 			if(event!=null) {

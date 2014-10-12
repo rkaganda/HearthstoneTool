@@ -31,6 +31,7 @@ public class CardZoneView extends JPanel implements HearthstoneCardZoneListener 
 		listModel = new DefaultListModel<HearthstoneCard>();
 		
 		cardList = new JList<HearthstoneCard>(listModel);
+		cardList.setCellRenderer(new CardZoneCellRenderer());
 		
 		zone = z;
 		zone.addListener(this);
@@ -54,21 +55,11 @@ public class CardZoneView extends JPanel implements HearthstoneCardZoneListener 
 
 	@Override
 	public void cardAdded(HearthstoneCard card) {
-		//TODO fix and render
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				repaint();
-			}
-		});
+		listModel.addElement(card);
 	}
 
 	@Override
 	public void cardRemoved(HearthstoneCard card) {
-		//TODO fix and render
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				repaint();
-			}
-		});
+		listModel.removeElement(card);
 	}
 }
