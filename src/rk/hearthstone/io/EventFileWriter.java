@@ -21,7 +21,7 @@ public class EventFileWriter {
 	private final static String saveDir = "saved";
 	
 	public static String writeEventFile(List<Map<String,String>> events, String fileName ) {
-		String fullName = System.getProperty("user.home")+"\\"+fileName+".xml";
+		String fullName = fileName+".xml";
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
