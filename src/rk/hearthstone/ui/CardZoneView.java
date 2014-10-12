@@ -9,6 +9,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 
 import rk.hearthstone.model.HearthstoneCard;
 import rk.hearthstone.model.HearthstoneCardZone;
@@ -20,16 +21,16 @@ public class CardZoneView extends JPanel implements HearthstoneCardZoneListener 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	protected JList<String> cardList;
+	protected JList<HearthstoneCard> cardList;
 	protected JLabel listLabel;
-	protected DefaultListModel<String> listModel;
+	protected DefaultListModel<HearthstoneCard> listModel;
 	protected HearthstoneCardZone zone;
 	
 	public CardZoneView(HearthstoneCardZone z) {
 		listLabel = new JLabel(z.getName());
-		listModel = new DefaultListModel<String>();
+		listModel = new DefaultListModel<HearthstoneCard>();
 		
-		cardList = new JList<String>(listModel);
+		cardList = new JList<HearthstoneCard>(listModel);
 		
 		zone = z;
 		zone.addListener(this);
@@ -54,24 +55,20 @@ public class CardZoneView extends JPanel implements HearthstoneCardZoneListener 
 	@Override
 	public void cardAdded(HearthstoneCard card) {
 		//TODO fix and render
-		resetListModel();
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				repaint();
+			}
+		});
 	}
 
 	@Override
 	public void cardRemoved(HearthstoneCard card) {
 		//TODO fix and render
-		resetListModel();
-	}
-	
-	
-	protected void resetListModel() {
-		listModel.removeAllElements();
-		for(HearthstoneCard card:zone.getCards()) {
-			if(card.get("name").equals("unknown")) {
-				listModel.addElement(card.get("id"));
-			}else {
-				listModel.addElement(card.get("name"));
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				repaint();
 			}
-		}
+		});
 	}
 }

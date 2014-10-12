@@ -654,7 +654,6 @@ public class HearthstoneGame {
 				break; //leave for
 			}
 		}
-		
 		return card; //card is null if not found
 	}
 	

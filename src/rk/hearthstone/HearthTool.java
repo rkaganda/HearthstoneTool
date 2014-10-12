@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import rk.hearthstone.io.EventFileWriter;
 import rk.hearthstone.io.LogFileWatcher;
@@ -13,15 +14,16 @@ import rk.hearthstone.model.HearthstoneCardZone;
 import rk.hearthstone.model.HearthstoneGame;
 import rk.hearthstone.ui.HearthFrame;
 
-public class HearthTool {
+public class HearthTool implements Runnable {
 	protected HearthFrame theFrame;
-	protected boolean watchingFile, recordingGames;
+	protected boolean watchingFile, recordingGames, processEvents;
 	protected File watchedFile;
 	protected ArrayList<String> lastLog;
 	protected HearthstoneGame theGame;
 	protected LogFileWatcher myWatcher;
-	protected Thread watcherThread;
-	protected ArrayList<Map<String,String>> gameEvents;
+	protected Thread watcherThread, recordThread;
+	protected ArrayList<Map<String,String>> processedEvents;
+	protected LinkedBlockingQueue<Map<String,String>> queuedEvents;
 	
 	public static void main(String args[]) {
 		HearthTool myTool = new HearthTool();
@@ -32,7 +34,8 @@ public class HearthTool {
 		watchingFile = false;
 		recordingGames = false;
 		theGame = new HearthstoneGame(this);
-		gameEvents = new ArrayList<Map<String,String>>();
+		processedEvents = new ArrayList<Map<String,String>>();
+		queuedEvents = new LinkedBlockingQueue<Map<String,String>>();
 	}
 	
 	public void parseLog(File file) {
@@ -48,30 +51,22 @@ public class HearthTool {
 			if(s.substring(0,6).equals("[Zone]")) { //if [Zone] log
 				Map<String,String> event = HearthstoneGame.parseEvent(s); //attempt to parse event
 				if(event.containsKey(("type"))) { //if event was parsed
-					try{
-						theGame.handleEvent(event); //pass event to game to handle
-					}catch(Exception e) {
-						writeConsole("Event handling threw Exception: "+e.getMessage()+"\n");
-						writeConsole("Event: ");
-						this.logEvent(event);
-						stopWatching();
+					try {
+						System.out.println("event");
+						queuedEvents.put(event); //queue the event to be handled
+					} catch (InterruptedException e) {
 						e.printStackTrace();
-					}
-					if(!event.containsKey("eventHandled")) { //check if event was handled
-						logEvent(event); //debug
-					}
-					if(recordingGames) {
-						gameEvents.add(event);
-					}
+					} 
 				}
 			}
 		}
 	}
 	
 	protected void saveEventFile() {
-		if(gameEvents.size()>0) {
-			writeConsole("Event file saved to: "+EventFileWriter.writeEventFile(gameEvents, "eventlist_"+ System.currentTimeMillis()));
+		if(processedEvents.size()>0) {
+			writeConsole("Event file saved to: "+EventFileWriter.writeEventFile(processedEvents, "eventlist_"+ System.currentTimeMillis()));
 		}
+		processedEvents.clear();
 	}
 	
 	public void logLoaded(ArrayList<String> arrayList,String name) {
@@ -83,7 +78,7 @@ public class HearthTool {
 					}
 				}
 			}
-			lastLog = arrayList;
+			lastLog = arrayList; //initial save
 		}else{
 			theFrame.writeConsole("Loaded file: "+name+" OK\n");
 		}
@@ -123,13 +118,23 @@ public class HearthTool {
 
 	public void doRecord() {
 		if(watchingFile){ //sanity check
-			if(!recordingGames ) { //not recording
-				theGame.reset(); //reset the game, push new zones to view
-				gameEvents.clear(); //clear event list
+			if(!recordingGames ) { // not recording
+				theGame.reset(); // reset the game, push new zones to view
+				processedEvents.clear(); //clear event list
 				recordingGames = true;
-			}else if(recordingGames) {
-				theFrame.recordingStop(); //stop recording
-				recordingGames = false;
+				processEvents = true;
+				recordThread = new Thread(this); // create thread to run record process
+				recordThread.start(); // run record process
+				System.out.println("running");
+			}else if(recordingGames) { // recording
+				recordingGames = false; //stop 
+				processEvents = false; //stop proccesing events
+				try {
+					recordThread.join(); // wait for for thread to die
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				theFrame.recordingStop(); //update ui
 				saveEventFile();
 			}
 		}
@@ -160,6 +165,32 @@ public class HearthTool {
 			theFrame.writeConsoleLine("Game State: HERO_GRAVEYARD");
 			if(recordingGames) {
 				saveEventFile();
+			}
+		}
+	}
+
+	@Override
+	public void run() {
+		System.out.println("looping");
+		while(processEvents) {
+			Map<String,String> event = queuedEvents.poll();
+			if(event!=null) {
+				try{
+				
+					theGame.handleEvent(event); //pass event and save return
+				}catch(Exception e) {
+					writeConsole("Event handling threw Exception: "+e.getMessage()+"\n");
+					writeConsole("Event: ");
+					this.logEvent(event);
+					stopWatching();
+					e.printStackTrace();
+				}
+				if(!event.containsKey("eventHandled")) { //check if event was handled
+					logEvent(event); //debug
+				}
+				if(recordingGames) {
+					processedEvents.add(event);
+				}
 			}
 		}
 	}
