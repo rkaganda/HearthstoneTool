@@ -180,16 +180,17 @@ public class HearthFrame extends JFrame implements ActionListener {
 	protected void startWatching() {
 		if(loadPrevFile) {
 			hearthTool.watchFile(prevFile);
-		}
-		final JFileChooser fc = new JFileChooser(); //get the file 
-		int returnVal = fc.showOpenDialog(this);
+		}else{
+			final JFileChooser fc = new JFileChooser(); //get the file 
+			int returnVal = fc.showOpenDialog(this);
 
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            hearthTool.watchFile(file); //send File to tool for watching
-            loadPrevFile = true;
-            prevFile = file;
-        }
+        	if (returnVal == JFileChooser.APPROVE_OPTION) {
+            	File file = fc.getSelectedFile();
+            	hearthTool.watchFile(file); //send File to tool for watching
+            	loadPrevFile = true;
+            	prevFile = file;
+        	}
+		}
 	}
 	
 	protected void loadEvents() {

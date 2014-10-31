@@ -47,6 +47,7 @@ public class HearthTool implements Runnable {
 	protected void parseNewLine(String s) {
 		if(s.length()>6) {  //validate length
 			if(s.substring(0,6).equals("[Zone]")) { //if [Zone] log
+				//System.out.println(s);
 				Map<String,String> event = HearthstoneGame.parseEvent(s); //attempt to parse event
 				if(event.containsKey(("type"))) { //if event was parsed
 					try {

@@ -97,6 +97,20 @@ public class HearthstoneGame {
 				event.put("to","unknown");
 			}
 		}
+		
+		//turn events
+		if(s.contains("START waiting for zone")) {
+			event.put("type","waiting for zone");
+			event.put("frame","START");
+			event.put("zone",s.substring(s.indexOf("zone")+5, s.length()));
+			System.out.println(s.substring(s.indexOf("START waiting for zone")));
+		}
+		if(s.contains("END waiting for zone")) {
+			event.put("type","waiting for zone");
+			event.put("frame","END");
+			event.put("zone",s.substring(s.indexOf("zone")+5, s.length()));
+			System.out.println(s.substring(s.indexOf("END waiting for zone")));
+		}
 		return event;
 	}
 	
