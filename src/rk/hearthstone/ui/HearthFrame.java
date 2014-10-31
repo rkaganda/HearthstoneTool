@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,10 +14,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -28,7 +22,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import rk.hearthstone.HearthTool;
-import rk.hearthstone.model.HearthstoneCard;
 import rk.hearthstone.model.HearthstoneCardZone;
 
 public class HearthFrame extends JFrame implements ActionListener {
@@ -38,7 +31,10 @@ public class HearthFrame extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	protected HearthTool hearthTool;
-
+	
+	protected boolean loadPrevFile;
+	protected File prevFile;
+	
 	protected JPanel cardViews;
 	protected JButton watchButton, recordButton, eventButton;
 	
@@ -53,6 +49,7 @@ public class HearthFrame extends JFrame implements ActionListener {
 		hearthTool = hT;
 		
 		isWatching = false;
+		loadPrevFile = false;
 		
 		setupUI();
 		setVisible(true);
@@ -181,12 +178,17 @@ public class HearthFrame extends JFrame implements ActionListener {
 	}
 
 	protected void startWatching() {
+		if(loadPrevFile) {
+			hearthTool.watchFile(prevFile);
+		}
 		final JFileChooser fc = new JFileChooser(); //get the file 
 		int returnVal = fc.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             hearthTool.watchFile(file); //send File to tool for watching
+            loadPrevFile = true;
+            prevFile = file;
         }
 	}
 	

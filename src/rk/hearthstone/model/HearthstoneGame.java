@@ -690,6 +690,7 @@ public class HearthstoneGame {
 		 }
 	
 	public void reset() {
+		System.out.println("reset");
 		opposingDeck.clearZone();	//empty zones
 		friendlyDeck.clearZone();
 		opposingHand.clearZone();
@@ -701,7 +702,11 @@ public class HearthstoneGame {
 		
 		theTool.notifyGameState(gameState = WAITING_HERO);
 	}
-
+	
+	public void endgame() {
+		theTool.notifyGameState(gameState = WAITING_HERO);
+	}
+	
 	public List<HearthstoneCardZone> getZones() {
 		return zones;
 	}

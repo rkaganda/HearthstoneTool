@@ -2,15 +2,12 @@ package rk.hearthstone;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import rk.hearthstone.io.EventFileWriter;
 import rk.hearthstone.io.LogFileWatcher;
 import rk.hearthstone.io.LogParserWorker;
-import rk.hearthstone.model.HearthstoneCard;
-import rk.hearthstone.model.HearthstoneCardZone;
 import rk.hearthstone.model.HearthstoneGame;
 import rk.hearthstone.ui.HearthFrame;
 
@@ -24,6 +21,7 @@ public class HearthTool implements Runnable {
 	protected Thread watcherThread, recordThread;
 	protected ArrayList<Map<String,String>> processedEvents;
 	protected LinkedBlockingQueue<Map<String,String>> queuedEvents;
+	
 	
 	public static void main(String args[]) {
 		HearthTool myTool = new HearthTool();
@@ -63,7 +61,7 @@ public class HearthTool implements Runnable {
 	
 	protected void saveEventFile() {
 		if(processedEvents.size()>0) {
-			writeConsole("Event file saved to: "+EventFileWriter.writeEventFile(processedEvents, "eventlist_"+ System.currentTimeMillis()));
+			writeConsole("Event file saved to: "+EventFileWriter.writeEventFile(processedEvents, "eventlist_"+ System.currentTimeMillis())+"\n");
 		}
 		processedEvents.clear();
 	}
@@ -133,6 +131,7 @@ public class HearthTool implements Runnable {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				theGame.endgame();
 				theFrame.recordingStop(); //update ui
 				saveEventFile();
 			}
@@ -174,7 +173,6 @@ public class HearthTool implements Runnable {
 			Map<String,String> event = queuedEvents.poll();
 			if(event!=null) {
 				try{
-				
 					theGame.handleEvent(event); //pass event and save return
 				}catch(Exception e) {
 					writeConsole("Event handling threw Exception: "+e.getMessage()+"\n");

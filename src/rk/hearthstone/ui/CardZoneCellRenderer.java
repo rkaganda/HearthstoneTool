@@ -11,6 +11,11 @@ import rk.hearthstone.model.HearthstoneCard;
 
 public class CardZoneCellRenderer extends JLabel implements ListCellRenderer<Object>{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public Component getListCellRendererComponent(JList<? extends Object> list,
 			Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -38,8 +43,9 @@ public class CardZoneCellRenderer extends JLabel implements ListCellRenderer<Obj
 
         // check if this cell is selected
         } else if (isSelected) {
-            background = Color.RED;
+            background = Color.BLACK;
             foreground = Color.WHITE;
+            System.out.println("cell");
 
         // unselected, and not the DnD drop location
         } else {

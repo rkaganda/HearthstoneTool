@@ -9,7 +9,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 
 import rk.hearthstone.model.HearthstoneCard;
 import rk.hearthstone.model.HearthstoneCardZone;
